@@ -1,5 +1,5 @@
 const navLinks = [
-  { id: 1, name: "Dashboard", path: "/dashboard" },
+  { id: 1, name: "Dashboard", path: "/" },
   { id: 2, name: "Events Calendar", path: "/events-calendar" },
   { id: 3, name: "Event Booking", path: "/event-booking" },
   { id: 4, name: "User Details", path: "/user-details" },

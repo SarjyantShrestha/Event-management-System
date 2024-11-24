@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const LoginPage = () => {
+const SignupPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -16,7 +16,7 @@ const LoginPage = () => {
       <h1 className="text-3xl my-12">Welcome to Event Space</h1>
       <div className="bg-white p-8 rounded-lg shadow-lg w-96">
         <h2 className="text-2xl font-semibold text-center mb-6">
-          Login to your account
+          Create a new account
         </h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
@@ -24,7 +24,7 @@ const LoginPage = () => {
               Email
             </label>
             <div className="flex items-center border border-gray-300 rounded-lg p-2 mt-1">
-              <span className="mr-1">
+              <span className="mr-2">
                 <i className="fas fa-user"></i>
               </span>
               <input
@@ -38,12 +38,12 @@ const LoginPage = () => {
             </div>
           </div>
 
-          <div className="mb-6">
+          <div className="mb-4">
             <label htmlFor="password" className="block text-gray-700">
               Password
             </label>
             <div className="flex items-center border border-gray-300 rounded-lg p-2 mt-1">
-              <span className="mr-1">
+              <span className="mr-2">
                 <i className="fas fa-lock"></i>
               </span>
               <input
@@ -55,21 +55,35 @@ const LoginPage = () => {
                 placeholder="Password"
               />
             </div>
-            <div className="flex justify-between mt-2">
-              <a href="/" className="text-blue-600 text-xs">
-                Forgot password?
-              </a>
-              <a href="/register" className="text-blue-600 text-xs">
-                Register account
-              </a>
+          </div>
+
+          <div className="mb-6">
+            <label htmlFor="password" className="block text-gray-700">
+              Confirm Password
+            </label>
+            <div className="flex items-center border border-gray-300 rounded-lg p-2 mt-1">
+              <span className="mr-2">
+                <i className="fas fa-lock"></i>
+              </span>
+              <input
+                type="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full p-1 border-none outline-none"
+                placeholder="Password"
+              />
             </div>
+            <a href="/login" className="text-blue-600 text-xs">
+              Already have an account?
+            </a>
           </div>
 
           <button
             type="submit"
             className="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 focus:outline-none"
           >
-            Log in
+            Register
           </button>
         </form>
       </div>
@@ -77,4 +91,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default SignupPage;
