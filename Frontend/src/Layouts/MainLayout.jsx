@@ -10,7 +10,7 @@ const MainLayout = () => {
         <div className="flex justify-between items-center mb-10 px-2">
           <h1 className="text-xl font-bold">Event Space</h1>
           <button className="text-lg font-bold hover:text-gray-300">
-            <i class="fa-solid fa-bars"></i>
+            <i className="fa-solid fa-bars"></i>
           </button>
         </div>
         <ul className="space-y-4">
