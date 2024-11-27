@@ -20,6 +20,8 @@ const MainLayout = () => {
                 to={nav.path}
                 className="block hover:bg-blue-400 px-3 py-2 rounded cursor-pointer"
               >
+               {/* Render icon */}
+               <i className={`${nav.icon} mr-3`}></i>  
                 {nav.name}
               </Link>
             </li>
