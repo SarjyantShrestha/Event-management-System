@@ -49,7 +49,7 @@ const EventBooking = () => {
   };
 
   return (
-    <div className="event-booking-container max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
+      <div className="event-booking-container max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md" >
       <h1 className="text-2xl font-bold mb-6 text-center">Event Booking</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Event Name */}
@@ -87,7 +87,8 @@ const EventBooking = () => {
         </div>
 
         {/* Start Date and Time */}
-        <div className="form-group">
+        <div className="flex gap-4">
+        <div className="form-group flex-1">
           <label htmlFor="startDate" className="block text-gray-700">Start Date</label>
           <input
             type="date"
@@ -100,7 +101,7 @@ const EventBooking = () => {
           />
         </div>
 
-        <div className="form-group">
+        <div className="form-group flex-1">
           <label htmlFor="startTime" className="block text-gray-700">Start Time</label>
           <input
             type="time"
@@ -112,9 +113,11 @@ const EventBooking = () => {
             required
           />
         </div>
+      </div>
 
+      <div className="flex gap-4">
         {/* End Date and Time */}
-        <div className="form-group">
+        <div className="form-group flex-1">
           <label htmlFor="endDate" className="block text-gray-700">End Date</label>
           <input
             type="date"
@@ -127,7 +130,7 @@ const EventBooking = () => {
           />
         </div>
 
-        <div className="form-group">
+        <div className="form-group flex-1">
           <label htmlFor="endTime" className="block text-gray-700">End Time</label>
           <input
             type="time"
@@ -139,6 +142,7 @@ const EventBooking = () => {
             required
           />
         </div>
+      </div>
 
         {/* Number of Participants */}
         <div className="form-group">
