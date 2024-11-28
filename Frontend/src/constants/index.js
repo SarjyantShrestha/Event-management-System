@@ -3,7 +3,8 @@ const navLinks = [
   { id: 2, name: "Events Calendar", path: "/events-calendar", icon: "fas fa-calendar-alt" },
   { id: 3, name: "Event Booking", path: "/event-booking", icon: "fas fa-ticket-alt" },
   { id: 4, name: "User Details", path: "/user-details", icon: "fas fa-user" },
-  { id: 5, name: "Holidays", path: "/holidays", icon: "fas fa-plane" },
+  { id: 5, name: "Spaces", path: "/Spaces", icon: "fas fa-location-dot" },
+  { id: 5, name: "Manage Events", path: "/manage-events", icon: "fas fa-calendar-check" },
 ];
 
 export default navLinks;
