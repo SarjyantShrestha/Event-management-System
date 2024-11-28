@@ -10,7 +10,7 @@ const MainLayout = () => {
         <div className="flex justify-between items-center mb-10 px-2">
           <h1 className="text-xl font-bold">Event Space</h1>
           <button className="text-lg font-bold hover:text-gray-300">
-            <i className="fa-solid fa-bars"></i>
+            <i class="fa-solid fa-bars"></i>
           </button>
         </div>
         <ul className="space-y-4">
@@ -20,6 +20,8 @@ const MainLayout = () => {
                 to={nav.path}
                 className="block hover:bg-blue-400 px-3 py-2 rounded cursor-pointer"
               >
+               {/* Render icon */}
+               <i className={`${nav.icon} mr-3`}></i>  
                 {nav.name}
               </Link>
             </li>

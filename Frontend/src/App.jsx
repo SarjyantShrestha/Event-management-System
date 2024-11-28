@@ -6,7 +6,9 @@ import Dashboard from "./components/Dashboard";
 import EventsCalendar from "./components/EventCalendar";
 import EventBooking from "./components/EventBooking";
 import UserDetails from "./components/UserDetails";
-import Holidays from "./components/Holidays";
+import ManageSpaces from "./components/Spaces";
+import ManageEvent from "./components/ManageEvent";
+
 import "./App.css";
 
 function App() {
@@ -22,8 +24,9 @@ function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="events-calendar" element={<EventsCalendar />} />
           <Route path="event-booking" element={<EventBooking />} />
+          <Route path="manage-events" element={<ManageEvent />} />
           <Route path="user-details" element={<UserDetails />} />
-          <Route path="holidays" element={<Holidays />} />
+          <Route path="spaces" element={<ManageSpaces />} />
         </Route>
       </Routes>
     </BrowserRouter>
