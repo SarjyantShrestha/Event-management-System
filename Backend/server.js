@@ -1,13 +1,19 @@
 import express from "express";
+// import authRoutes from "./src/routes/authRoutes.js";
 
 const app = express();
+
 app.use(express.json());
-const PORT = process.env.PORT || 3000;
+
+// route for register authentication
+// app.use("/api/auth", authRoutes);
 
 app.get("/", (req, res) => {
-  res.send("Sever is running");
+  res.send("Welcome to the Event Management System API!");
 });
 
+const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
-  console.log(`Server is running on port: ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
