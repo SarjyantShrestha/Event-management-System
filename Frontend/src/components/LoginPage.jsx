@@ -1,14 +1,71 @@
 import React, { useState } from "react";
 
 const LoginPage = () => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  const [errors, setErrors] = useState({});
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleErrors = (field, message) => {
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [field]: message,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log("Email:", email);
-    console.log("Password:", password);
+    //clears previous errors
+    setErrors({});
+    let isValid = true;
+
+    // Regex for email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // Validate email
+    if (!email) {
+      handleErrors("email", "Email is required.");
+      isValid = false;
+    } else if (!emailRegex.test(email)) {
+      handleErrors("email", "Please enter a valid email.");
+      isValid = false;
+    }
+
+    // Validate password
+    if (!password) {
+      handleErrors("password", "Password is required.");
+      isValid = false;
+    }
+
+    if (!isValid) return;
+
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        // Save the token and navigate
+        localStorage.setItem("token", data.token);
+        alert("Login successful!");
+        console.log("Token:", data.token);
+        // Redirect to dashboard or homepage
+        window.location.href = "/";
+      } else {
+        // Handle backend errors
+        if (data.message) {
+          alert(data.message);
+        }
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("An error occurred during login. Please try again.");
+    }
   };
 
   return (
@@ -18,7 +75,7 @@ const LoginPage = () => {
         <h2 className="text-2xl font-semibold text-center mb-6">
           Login to your account
         </h2>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} action="/login" method="POST">
           <div className="mb-4">
             <label htmlFor="email" className="block text-gray-700">
               Email
@@ -31,11 +88,17 @@ const LoginPage = () => {
                 type="text"
                 id="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setErrors({});
+                  setEmail(e.target.value);
+                }}
                 className="w-full p-1 border-none outline-none"
                 placeholder="Email"
               />
             </div>
+            {errors.email && (
+              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+            )}
           </div>
 
           <div className="mb-6">
@@ -50,11 +113,17 @@ const LoginPage = () => {
                 type="password"
                 id="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setErrors({});
+                  setPassword(e.target.value);
+                }}
                 className="w-full p-1 border-none outline-none"
                 placeholder="Password"
               />
             </div>
+            {errors.password && (
+              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+            )}
             <div className="flex justify-between mt-2">
               <a href="/" className="text-blue-600 text-xs">
                 Forgot password?
