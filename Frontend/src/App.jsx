@@ -24,9 +24,9 @@ function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="events-calendar" element={<EventsCalendar />} />
           <Route path="event-booking" element={<EventBooking />} />
-          <Route path="manage-events" element={<ManageEvent />} />
           <Route path="user-details" element={<UserDetails />} />
           <Route path="spaces" element={<ManageSpaces />} />
+          <Route path="manage-events" element={<ManageEvent />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -52,7 +52,7 @@ const ManageEvents = () => {
       : events.filter((event) => event.status === filter);
 
   return (
-    <div className="p-8 bg-gray-100 min-h-screen">
+    <div className="p-8 bg-gray-100">
       <h1 className="text-3xl font-bold mb-6 text-center text-blue-600">
         Manage Events
       </h1>
@@ -133,4 +133,3 @@ const ManageEvents = () => {
 };
 
 export default ManageEvents;
-
