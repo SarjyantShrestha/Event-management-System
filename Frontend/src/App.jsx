@@ -10,6 +10,7 @@ import ManageSpaces from "./components/Spaces";
 import ManageEvent from "./components/ManageEvent";
 
 import "./App.css";
+import ErrorPage from "./components/ErrorPage";
 
 function App() {
   return (
@@ -28,6 +29,8 @@ function App() {
           <Route path="spaces" element={<ManageSpaces />} />
           <Route path="manage-events" element={<ManageEvent />} />
         </Route>
+
+        <Route path="*" element={<ErrorPage />} />
       </Routes>
     </BrowserRouter>
   );
