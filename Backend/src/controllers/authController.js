@@ -4,7 +4,7 @@ import pool from "../config/db.js";
 
 // Register User
 export const register = async (req, res) => {
-  const { username, email, password } = req.body;
+  const { firstname, lastname, email, password } = req.body;
   try {
     // Check if user exists
     const userExists = await pool.query(
@@ -21,8 +21,8 @@ export const register = async (req, res) => {
     // Insert user into database
     const currentDate = new Date();
     const newUser = await pool.query(
-      "INSERT INTO users (username, email, password, created_at) VALUES ($1, $2, $3, $4) RETURNING *",
-      [username, email, hashedPassword, currentDate],
+      "INSERT INTO users (firstname, lastname, email, password, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+      [firstname, lastname, email, hashedPassword, currentDate],
     );
 
     res.status(201).json({
@@ -55,7 +55,7 @@ export const login = async (req, res) => {
 
     // generate JWT token
     const token = jwt.sign(
-      { userId: user.rows[0].id },
+      { userId: user.rows[0].user_id, role: user.rows[0].role },
       process.env.JWT_SECRET,
       { expiresIn: "1h" },
     );

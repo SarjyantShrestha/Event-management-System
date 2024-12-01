@@ -1,8 +1,8 @@
-import { fetchUserById, fetchAllUsers } from "../models/userModel.js";
+import { fetchUserById, fetchAllUsers } from "../model/userModel.js";
 
 // Get a user by ID
-export const getUser = async (req, res) => {
-  const userId = req.params.id; // Extract user ID from request params
+export const getSingleUser = async (req, res) => {
+  const userId = req.params.user_id; // Extract user ID from request params
   try {
     const user = await fetchUserById(userId);
     if (!user) {
@@ -16,7 +16,7 @@ export const getUser = async (req, res) => {
 };
 
 // Get all users
-export const getUsers = async (req, res) => {
+export const getAllUsers = async (req, res) => {
   try {
     const users = await fetchAllUsers();
     res.status(200).json(users);

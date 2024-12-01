@@ -7,7 +7,8 @@ const SignupPage = () => {
   const [errors, setErrors] = useState({});
 
   const [email, setEmail] = useState("");
-  const [username, setUsername] = useState("");
+  const [firstname, setFirstname] = useState("");
+  const [lastname, setLastname] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -26,8 +27,12 @@ const SignupPage = () => {
 
     let isValid = true;
 
-    if (!username) {
-      handleErrors("username", "Username is required");
+    if (!firstname) {
+      handleErrors("firstname", "Firstname is required");
+      isValid = false;
+    }
+    if (!lastname) {
+      handleErrors("lastname", "Lastname is required");
       isValid = false;
     }
 
@@ -74,7 +79,8 @@ const SignupPage = () => {
         body: JSON.stringify({
           email,
           password,
-          username,
+          firstname,
+          lastname,
         }),
       });
 
@@ -99,25 +105,50 @@ const SignupPage = () => {
         </h2>
         <form onSubmit={handleSubmit} action="/register" method="POST">
           <div className="mb-4">
-            <label htmlFor="username" className="block text-gray-700">
-              Username
-            </label>
-            <div className="flex items-center border border-gray-300 rounded-lg p-2 mt-1">
-              <span className="mr-2">
-                <i className="fas fa-user"></i>
-              </span>
-              <input
-                type="text"
-                id="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full p-1 border-none outline-none"
-                placeholder="Username"
-              />
+            <label className="block text-gray-700 mb-2">Name</label>
+            <div className="flex space-x-4">
+              {/* First Name Field */}
+              <div className="flex-1">
+                <div className="flex items-center border border-gray-300 rounded-lg p-2">
+                  <span className="mr-2">
+                    <i className="fas fa-user"></i>
+                  </span>
+                  <input
+                    type="text"
+                    id="firstname"
+                    value={firstname}
+                    onChange={(e) => setFirstname(e.target.value)}
+                    className="w-full p-1 border-none outline-none"
+                    placeholder="First Name"
+                  />
+                </div>
+                {errors.firstname && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.firstname}
+                  </p>
+                )}
+              </div>
+
+              {/* Last Name Field */}
+              <div className="flex-1">
+                <div className="flex items-center border border-gray-300 rounded-lg p-2">
+                  <span className="mr-2">
+                    <i className="fas fa-user"></i>
+                  </span>
+                  <input
+                    type="text"
+                    id="lastname"
+                    value={lastname}
+                    onChange={(e) => setLastname(e.target.value)}
+                    className="w-full p-1 border-none outline-none"
+                    placeholder="Last Name"
+                  />
+                </div>
+                {errors.lastname && (
+                  <p className="text-red-500 text-sm mt-1">{errors.lastname}</p>
+                )}
+              </div>
             </div>
-            {errors.username && (
-              <p className="text-red-500 text-sm mt-1">{errors.username}</p>
-            )}
           </div>
           <div className="mb-4">
             <label htmlFor="email" className="block text-gray-700">

@@ -51,7 +51,7 @@ const LoginPage = () => {
 
       if (response.ok) {
         // Save the token and navigate
-        localStorage.setItem("token", data.token);
+        localStorage.setItem("token", data.token); // Store the token as a string
         alert("Login successful!");
         console.log("Token:", data.token);
         // Redirect to dashboard or homepage
