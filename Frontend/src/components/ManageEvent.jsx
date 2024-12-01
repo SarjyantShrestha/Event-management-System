@@ -1,51 +1,40 @@
-import React, { useState } from "react";
-
-const initialEvents = [
-  {
-    id: 1,
-    name: "Music Concert",
-    venue: "Hall A",
-    date: "2024-08-01",
-    time: "18:00",
-    participants: 150,
-    status: "Pending",
-  },
-  {
-    id: 2,
-    name: "Tech Meetup",
-    venue: "Conference Room 3",
-    date: "2024-08-05",
-    time: "10:00",
-    participants: 50,
-    status: "Approved",
-  },
-  {
-    id: 3,
-    name: "Art Workshop",
-    venue: "Studio 2",
-    date: "2024-08-10",
-    time: "14:00",
-    participants: 30,
-    status: "Denied",
-  },
-];
+import React, { useState, useEffect } from "react";
 
 const ManageEvents = () => {
-  const [events, setEvents] = useState(initialEvents);
+  const [events, setEvents] = useState([]);
   const [filter, setFilter] = useState("All");
 
-  const updateStatus = (id, status) => {
+  // Fetch events from the backend
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5000/api/event-bookings"
+        );
+        const data = await response.json();
+        setEvents(data);
+      } catch (error) {
+        console.error("Error fetching events:", error);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
+  const updateStatus = (calendar_id, status) => {
+    // Update status logic (can be expanded to interact with the backend)
     const updatedEvents = events.map((event) =>
-      event.id === id ? { ...event, status } : event
+      event.calendar_id === calendar_id ? { ...event, status } : event
     );
     setEvents(updatedEvents);
   };
-
-  const deleteEvent = (id) => {
-    const updatedEvents = events.filter((event) => event.id !== id);
+  
+  const deleteEvent = (calendar_id) => {
+    // Delete event logic (can be expanded to interact with the backend)
+    const updatedEvents = events.filter((event) => event.calendar_id !== calendar_id);
     setEvents(updatedEvents);
   };
-
+  
   const filteredEvents =
     filter === "All"
       ? events
@@ -83,6 +72,7 @@ const ManageEvents = () => {
                 "Event Name",
                 "Venue",
                 "Start Date & Time",
+                "End Date & Time",
                 "Participants",
                 "Status",
                 "Actions",
@@ -95,29 +85,49 @@ const ManageEvents = () => {
           </thead>
           <tbody className="text-gray-700">
             {filteredEvents.map((event) => (
-              <tr key={event.id} className="hover:bg-gray-100 border-b">
-                <td className="py-4 px-6 text-center">{event.name}</td>
-                <td className="py-4 px-6 text-center">{event.venue}</td>
+              <tr key={event.calendar_id} className="hover:bg-gray-100 border-b">
+                <td className="py-4 px-6 text-center">{event.event_name}</td>
+                <td className="py-4 px-6 text-center">{event.venue_name}</td>
                 <td className="py-4 px-6 text-center">
-                  {event.date} at {event.time}
+                  {(() => {
+                    // Format date and time
+                    const formattedStartDate = new Date(
+                      event.start_date
+                    ).toLocaleDateString(); // Formats to 'MM/DD/YYYY' by default
+                    const formattedStartTime = event.start_time.slice(0, 5); // Assuming end_time is 'HH:MM:SS'
+
+                    return `${formattedStartDate} at ${formattedStartTime}`;
+                  })()}
                 </td>
+                <td className="py-4 px-6 text-center">
+                  {(() => {
+                    // Format date and time
+                    const formattedEndDate = new Date(
+                      event.end_date
+                    ).toLocaleDateString(); // Formats to 'MM/DD/YYYY' by default
+                    const formattedEndTime = event.end_time.slice(0, 5); // Assuming end_time is 'HH:MM:SS'
+
+                    return `${formattedEndDate} at ${formattedEndTime}`;
+                  })()}
+                </td>
+
                 <td className="py-4 px-6 text-center">{event.participants}</td>
                 <td className="py-4 px-6 text-center">{event.status}</td>
                 <td className="py-4 px-6 flex justify-center space-x-3">
                   <button
-                    onClick={() => updateStatus(event.id, "Approved")}
+                    onClick={() => updateStatus(event.calendar_id, "Approved")}
                     className="text-green-500 hover:text-green-700"
                   >
                     Approve
                   </button>
                   <button
-                    onClick={() => updateStatus(event.id, "Denied")}
+                    onClick={() => updateStatus(event.calendar_id, "Denied")}
                     className="text-red-500 hover:text-red-700"
                   >
                     Deny
                   </button>
                   <button
-                    onClick={() => deleteEvent(event.id)}
+                    onClick={() => deleteEvent(event.calendar_id)}
                     className="text-gray-500 hover:text-gray-700"
                   >
                     Delete
