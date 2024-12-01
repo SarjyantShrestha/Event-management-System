@@ -1,12 +1,13 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router";
 
 const LoginPage = () => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
   const [errors, setErrors] = useState({});
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const navigate = useNavigate();
 
   const handleErrors = (field, message) => {
     setErrors((prevErrors) => ({
@@ -51,11 +52,10 @@ const LoginPage = () => {
 
       if (response.ok) {
         // Save the token and navigate
-        localStorage.setItem("token", data.token); // Store the token as a string
-        alert("Login successful!");
-        console.log("Token:", data.token);
-        // Redirect to dashboard or homepage
-        window.location.href = "/";
+        localStorage.setItem("authToken", data.token); // Store the token as a string
+        // alert("Login successful!");
+        // Redirect to dashboard
+        navigate("/");
       } else {
         // Handle backend errors
         if (data.message) {

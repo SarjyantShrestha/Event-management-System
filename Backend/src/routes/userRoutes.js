@@ -1,12 +1,13 @@
 import express from "express";
 import { getSingleUser, getAllUsers } from "../controllers/userController.js";
+import verifyRole from "../middleware/verifyRole.js";
 
 const router = express.Router();
 
-// get all users
-router.get("/", getAllUsers);
+// Route to get all users - only accessible by 'admin'
+router.get("/", verifyRole("admin"), getAllUsers);
 
-// get single users by id
-router.get("/:id", getSingleUser);
+// Route to get a single user by id - only accessible by 'admin'
+router.get("/:id", verifyRole("admin"), getSingleUser);
 
 export default router;

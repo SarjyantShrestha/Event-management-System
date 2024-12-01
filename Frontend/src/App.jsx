@@ -8,9 +8,10 @@ import EventBooking from "./components/EventBooking";
 import UserDetails from "./components/UserDetails";
 import ManageSpaces from "./components/Spaces";
 import ManageEvent from "./components/ManageEvent";
+import ProtectedRoute from "./components/ProtectedRoute";
+import ErrorPage from "./components/ErrorPage";
 
 import "./App.css";
-import ErrorPage from "./components/ErrorPage";
 
 function App() {
   return (
@@ -21,13 +22,19 @@ function App() {
         <Route path="register" element={<SignupPage />} />
 
         {/* Protected Routes */}
-        <Route element={<MainLayout />}>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="events-calendar" element={<EventsCalendar />} />
-          <Route path="event-booking" element={<EventBooking />} />
-          <Route path="user-details" element={<UserDetails />} />
-          <Route path="spaces" element={<ManageSpaces />} />
-          <Route path="manage-events" element={<ManageEvent />} />
+        <Route element={<ProtectedRoute />}>
+          <Route element={<MainLayout />}>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="events-calendar" element={<EventsCalendar />} />
+            <Route path="event-booking" element={<EventBooking />} />
+
+            {/* Admin-only Routes */}
+            <Route element={<ProtectedRoute requiredRole="admin" />}>
+              <Route path="user-details" element={<UserDetails />} />
+              <Route path="spaces" element={<ManageSpaces />} />
+              <Route path="manage-events" element={<ManageEvent />} />
+            </Route>
+          </Route>
         </Route>
 
         <Route path="*" element={<ErrorPage />} />
