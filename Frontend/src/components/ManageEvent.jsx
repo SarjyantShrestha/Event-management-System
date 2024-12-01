@@ -20,19 +20,54 @@ const ManageEvents = () => {
 
     fetchEvents();
   }, []);
-
-  const updateStatus = (calendar_id, status) => {
-    // Update status logic (can be expanded to interact with the backend)
-    const updatedEvents = events.map((event) =>
-      event.calendar_id === calendar_id ? { ...event, status } : event
-    );
-    setEvents(updatedEvents);
-  };
+//update status
+  const updateStatus = async (calendar_id, status) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/event-bookings/${calendar_id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status }) // Sending the status in the body
+      });
   
-  const deleteEvent = (calendar_id) => {
-    // Delete event logic (can be expanded to interact with the backend)
-    const updatedEvents = events.filter((event) => event.calendar_id !== calendar_id);
-    setEvents(updatedEvents);
+      if (response.ok) {
+        const updatedEvent = await response.json();
+        // Update the local events state with the updated status
+        const updatedEvents = events.map((event) =>
+          event.calendar_id === calendar_id ? { ...event, status: updatedEvent.status } : event
+        );
+        setEvents(updatedEvents);
+      } else {
+        console.error('Failed to update event status');
+      }
+    } catch (error) {
+      console.error('Error updating event status:', error);
+    }
+  };
+
+  //delete events
+
+  const deleteEvent = async (calendar_id) => {
+    try {
+      // Send DELETE request to the backend
+      const response = await fetch(`http://localhost:5000/api/event-bookings/${calendar_id}`, {
+        method: 'DELETE',
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Event deleted:", data);
+  
+        // Update UI by removing the deleted event
+        const updatedEvents = events.filter((event) => event.calendar_id !== calendar_id);
+        setEvents(updatedEvents);
+      } else {
+        console.error("Failed to delete event:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error deleting event:", error);
+    }
   };
   
   const filteredEvents =

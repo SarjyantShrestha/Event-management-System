@@ -101,3 +101,51 @@ app.get("/api/event-bookings", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
+
+//PUT API to update event status
+app.put('/api/event-bookings/:calendar_id', async (req, res) => {
+  const { calendar_id } = req.params; // Extract calendar_id from URL
+  const { status } = req.body; // Extract status from the body
+
+  try {
+    // Update the status for the given calendar_id in the EventBookings table
+    const result = await pool.query(
+      `UPDATE "EventBookings" 
+       SET status = $1 
+       WHERE "calendar_id" = $2 RETURNING *`,
+      [status, calendar_id]
+    );
+
+    if (result.rowCount > 0) {
+      res.status(200).json(result.rows[0]); // Respond with updated event
+    } else {
+      res.status(404).send('Event not found');
+    }
+  } catch (error) {
+    console.error('Error updating event status:', error);
+    res.status(500).send('Server error');
+  }
+});
+
+//delete
+app.delete('/api/event-bookings/:calendar_id', async (req, res) => {
+  const { calendar_id } = req.params; // Get calendar_id from URL parameter
+
+  try {
+    // Query to delete the event with the specific calendar_id
+    const result = await pool.query(
+      'DELETE FROM "EventBookings" WHERE "calendar_id" = $1 RETURNING *', 
+      [calendar_id]
+    );
+
+    if (result.rowCount > 0) {
+      res.status(200).json({ message: 'Event deleted successfully' });
+    } else {
+      res.status(404).json({ message: 'Event not found' });
+    }
+  } catch (error) {
+    console.error("Error deleting event:", error);
+    res.status(500).send("Server error");
+  }
+});
+
