@@ -127,25 +127,95 @@ app.put('/api/event-bookings/:calendar_id', async (req, res) => {
   }
 });
 
-//delete
 app.delete('/api/event-bookings/:calendar_id', async (req, res) => {
   const { calendar_id } = req.params; // Get calendar_id from URL parameter
-
+  const client = await pool.connect();  // Start a transaction
+  
   try {
-    // Query to delete the event with the specific calendar_id
-    const result = await pool.query(
+    // Begin the transaction
+    await client.query('BEGIN');
+    
+    // Delete from EventBookings table
+    const eventBookingResult = await client.query(
       'DELETE FROM "EventBookings" WHERE "calendar_id" = $1 RETURNING *', 
       [calendar_id]
     );
 
-    if (result.rowCount > 0) {
-      res.status(200).json({ message: 'Event deleted successfully' });
-    } else {
-      res.status(404).json({ message: 'Event not found' });
+    if (eventBookingResult.rowCount === 0) {
+      // If no rows were deleted from EventBookings, rollback the transaction and return 404
+      await client.query('ROLLBACK');
+      return res.status(404).json({ message: 'Event not found in EventBookings' });
     }
+
+    // Delete from EventCalendar table
+    const eventCalendarResult = await client.query(
+      'DELETE FROM "EventCalendar" WHERE "calendar_id" = $1 RETURNING *', 
+      [calendar_id]
+    );
+
+    if (eventCalendarResult.rowCount === 0) {
+      // If no rows were deleted from EventCalendar, rollback the transaction
+      await client.query('ROLLBACK');
+      return res.status(404).json({ message: 'Event not found in EventCalendar' });
+    }
+
+    // Commit the transaction if both deletions were successful
+    await client.query('COMMIT');
+    res.status(200).json({ message: 'Event deleted successfully from both EventBookings and EventCalendar' });
+
   } catch (error) {
+    // In case of an error, rollback the transaction
+    await client.query('ROLLBACK');
     console.error("Error deleting event:", error);
     res.status(500).send("Server error");
+  } finally {
+    // Release the client
+    client.release();
   }
 });
 
+
+// app.get('/api/event-bookings/approved', async (req, res) => {
+//   try {
+//     // Query to get the events with status 'Approved' along with event details
+//     const result = await client.query(
+//       `SELECT eb."venue_id", eb."calendar_id", eb."user_id", eb."event_name", eb."participants", eb."status", ec."start_date", ec."start_time", ec."end_date", ec."end_time"
+//        FROM "EventBookings" eb
+//        JOIN "EventCalendar" ec ON eb."calendar_id" = ec."calendar_id"
+//        WHERE eb."status" = 'Approved'`
+//     );
+
+//     // If no data is found, return an appropriate response
+//     if (result.rowCount === 0) {
+//       return res.status(404).json({ message: 'No approved events found' });
+//     }
+
+//     // Send the result as JSON
+//     res.status(200).json(result.rows);
+//   } catch (error) {
+//     console.error("Error fetching approved events:", error);
+//     res.status(500).send("Server error");
+//   }
+// });
+
+
+app.get('/api/event-bookings/approved', async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT eb."venue_id", eb."calendar_id", eb."user_id", eb."event_name", eb."participants", eb."status", 
+              ec."start_date", ec."start_time", ec."end_date", ec."end_time"
+       FROM "EventBookings" eb
+       JOIN "EventCalendar" ec ON eb."calendar_id" = ec."calendar_id"
+       WHERE eb."status" = 'Approved'`
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: 'No approved events found' });
+    }
+
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error("Error fetching approved events:", error);
+    res.status(500).json({ message: "Server error" });  // Send JSON response on error
+  }
+});
