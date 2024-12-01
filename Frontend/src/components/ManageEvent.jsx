@@ -36,7 +36,7 @@ const ManageEvents = () => {
 
   const updateStatus = (id, status) => {
     const updatedEvents = events.map((event) =>
-      event.id === id ? { ...event, status } : event,
+      event.id === id ? { ...event, status } : event
     );
     setEvents(updatedEvents);
   };

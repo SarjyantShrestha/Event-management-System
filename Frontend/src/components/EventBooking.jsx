@@ -28,12 +28,35 @@ const EventBooking = () => {
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Simulate a booking submission (in a real app, you can send this to a server)
-    console.log("Event Booking Submitted:", eventDetails);
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   // Simulate a booking submission (in a real app, you can send this to a server)
+  //   console.log("Event Booking Submitted:", eventDetails);
 
-    // Optionally, reset the form after submission
+  //   // Optionally, reset the form after submission
+  //   setEventDetails({
+  //     eventName: "",
+  //     venue: "",
+  //     startDate: "",
+  //     endDate: "",
+  //     startTime: "",
+  //     endTime: "",
+  //     participants: 1,
+  //   });
+
+  //   alert("Event booked successfully!");
+  // };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch("http://localhost:5000/api/book-event", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(eventDetails),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        // Reset the form after successful submission
     setEventDetails({
       eventName: "",
       venue: "",
@@ -45,8 +68,14 @@ const EventBooking = () => {
     });
 
     alert("Event booked successfully!");
+      } else {
+        alert(data.message || "Booking failed.");
+      }
+    } catch (error) {
+      console.error("Error booking event:", error);
+    }
   };
-
+  
   return (
     <div className="event-booking-container max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
       <h1 className="text-2xl font-bold mb-6 text-center">Event Booking</h1>
