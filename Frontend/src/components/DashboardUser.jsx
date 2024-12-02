@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router";
 
-const DashboardAdmin = () => {
+const DashboardUser = () => {
   return (
     <div className="content">
       <div className="widgets-container">
@@ -68,17 +68,12 @@ const DashboardAdmin = () => {
         <div className="action-buttons">
           {/* Link to Event Booking (for Create Event) */}
           <Link to="/event-booking" className="action-btn">
-            <i className="fas fa-plus"></i> Create Event
+            <i className="fas fa-plus"></i> Your Space
           </Link>
 
           {/* Link to Events Calendar */}
           <Link to="/events-calendar" className="action-btn">
             <i className="fas fa-calendar"></i> View Calendar
-          </Link>
-
-          {/* Link to User Details */}
-          <Link to="/user-details" className="action-btn">
-            <i className="fas fa-users-cog"></i> Manage Users
           </Link>
 
           {/* Link to Settings (Optional: link to a settings page if created) */}
@@ -170,4 +165,4 @@ const DashboardAdmin = () => {
   );
 };
 
-export default DashboardAdmin;
+export default DashboardUser;

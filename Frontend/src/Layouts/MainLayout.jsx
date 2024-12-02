@@ -6,7 +6,7 @@ import { jwtDecode } from "jwt-decode";
 
 const MainLayout = () => {
   const [userRole, setUserRole] = useState(null);
-  const [userName, setUserName] = useState("");
+  // const [userName, setUserName] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -19,10 +19,10 @@ const MainLayout = () => {
           setUserRole(decodedToken.role);
         } catch (error) {
           console.error("Invalid token:", error);
-          navigate("/login"); // Redirect to login if token is invalid
+          navigate("/login");
         }
       } else {
-        navigate("/login"); // Redirect to login if there's no token
+        navigate("/login");
       }
     };
 
@@ -70,7 +70,7 @@ const MainLayout = () => {
         {/* Top Navbar */}
         <div className="bg-blue-400 h-16 text-white flex items-center justify-end px-10 space-x-7">
           <div className="text-lg">
-            Welcome,{" "}
+            Welcome,
             <span className="font-bold">
               {userRole === "admin" ? "Admin" : "User"}
             </span>
