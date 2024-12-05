@@ -55,9 +55,10 @@ const LoginPage = ({ setUserRole }) => {
         localStorage.setItem("authToken", data.token);
         const decodedToken = jwtDecode(data.token);
         setUserRole(decodedToken.role);
+
         navigate("/");
       } else {
-        handleErrors("backend", data.message || "Invalid credentials.");
+        alert(data.message || "Invalid credentials.");
       }
     } catch (error) {
       console.error("Login error:", error);
