@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
+import { jwtDecode } from "jwt-decode";
 
-const LoginPage = () => {
+const LoginPage = ({ setUserRole }) => {
   const [errors, setErrors] = useState({});
 
   const [email, setEmail] = useState("");
@@ -51,16 +52,12 @@ const LoginPage = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Save the token and navigate
-        localStorage.setItem("authToken", data.token); // Store the token as a string
-        // alert("Login successful!");
-        // Redirect to dashboard
+        localStorage.setItem("authToken", data.token);
+        const decodedToken = jwtDecode(data.token);
+        setUserRole(decodedToken.role);
         navigate("/");
       } else {
-        // Handle backend errors
-        if (data.message) {
-          alert(data.message);
-        }
+        handleErrors("backend", data.message || "Invalid credentials.");
       }
     } catch (error) {
       console.error("Login error:", error);

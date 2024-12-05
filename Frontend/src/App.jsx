@@ -17,57 +17,69 @@ import "./App.css";
 
 function App() {
   const [userRole, setUserRole] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const token = localStorage.getItem("authToken");
-
-    if (token) {
-      try {
-        const decodedToken = jwtDecode(token);
-        setUserRole(decodedToken.role); // Assuming `role` is in the token
-        console.log(userRole);
-      } catch (error) {
-        console.error("Invalid token:", error);
-      }
-    }
-    setLoading(false);
-  }, []);
+  // useEffect(() => {
+  //   const token = localStorage.getItem("authToken");
+  //
+  //   if (token) {
+  //     try {
+  //       const decodedToken = jwtDecode(token);
+  //       setUserRole(decodedToken.role); // Set the user role
+  //     } catch (error) {
+  //       console.error("Invalid token:", error);
+  //     }
+  //   }
+  //   setLoading(false); // Stop loading
+  // }, []);
 
   if (loading) {
-    return <div>Loading...</div>; // You can customize this with a spinner or loader
+    return <div>Loading...</div>; // Display a loading spinner
   }
 
   return (
     <BrowserRouter>
       <Routes>
         {/* Public Routes */}
-        <Route path="login" element={<LoginPage />} />
+        <Route path="login" element={<LoginPage setUserRole={setUserRole} />} />
         <Route path="register" element={<SignupPage />} />
 
         {/* Protected Routes */}
-        <Route element={<ProtectedRoute />}>
+        <Route
+          element={
+            <ProtectedRoute
+              allowedRoles={["admin", "user"]}
+              userRole={userRole}
+            />
+          }
+        >
           <Route element={<MainLayout />}>
+            {/* Role-Based Dashboard */}
             <Route
               path="/"
               element={
                 userRole === "admin" ? <DashboardAdmin /> : <DashboardUser />
               }
             />
+
+            {/* Shared Routes */}
             <Route path="events-calendar" element={<EventsCalendar />} />
             <Route path="event-booking" element={<EventBooking />} />
 
-            {/* Admin-only Routes */}
-            {userRole === "admin" && (
-              <>
-                <Route path="user-details" element={<UserDetails />} />
-                <Route path="spaces" element={<ManageSpaces />} />
-                <Route path="manage-events" element={<ManageEvent />} />
-              </>
-            )}
+            {/* Admin-Only Routes */}
+            <Route
+              element={
+                <ProtectedRoute allowedRoles={["admin"]} userRole={userRole} />
+              }
+            >
+              <Route path="user-details" element={<UserDetails />} />
+              <Route path="spaces" element={<ManageSpaces />} />
+              <Route path="manage-events" element={<ManageEvent />} />
+            </Route>
           </Route>
         </Route>
 
+        {/* Catch-All for Errors */}
         <Route path="*" element={<ErrorPage />} />
       </Routes>
     </BrowserRouter>
