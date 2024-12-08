@@ -3,7 +3,7 @@ import pool from "../config/db.js";
 export const fetchUserById = async (userId) => {
   try {
     const result = await pool.query(
-      `SELECT user_id, firstname, lastname, email, created_at, role, status FROM "Users" WHERE id = $1`,
+      `SELECT user_id, firstname, lastname, email, created_at, role FROM "Users" WHERE id = $1`,
       [userId],
     );
     return result.rows[0];
@@ -15,7 +15,7 @@ export const fetchUserById = async (userId) => {
 export const fetchAllUsers = async () => {
   try {
     const result = await pool.query(
-      `SELECT user_id, firstname, lastname, email, created_at, role, status FROM "Users"`,
+      `SELECT user_id, firstname, lastname, email, created_at, role FROM "Users"`,
     );
     return result.rows;
   } catch (error) {
