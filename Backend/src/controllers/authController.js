@@ -8,7 +8,7 @@ export const register = async (req, res) => {
   try {
     // Check if user exists
     const userExists = await pool.query(
-      "SELECT * FROM Users WHERE email = $1",
+      `SELECT * FROM "Users" WHERE email = $1`,
       [email],
     );
     if (userExists.rows.length > 0) {
@@ -21,7 +21,7 @@ export const register = async (req, res) => {
     // Insert user into database
     const currentDate = new Date();
     const newUser = await pool.query(
-      "INSERT INTO Users (firstname, lastname, email, password, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+      `INSERT INTO "Users" (firstname, lastname, email, password, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
       [firstname, lastname, email, hashedPassword, currentDate],
     );
 
@@ -39,7 +39,7 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await pool.query("SELECT * FROM Users WHERE email = $1", [
+    const user = await pool.query(`SELECT * FROM "Users" WHERE email = $1`, [
       email,
     ]);
     // check if email matches
