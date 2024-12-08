@@ -1,14 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { jwtDecode } from "jwt-decode";
 
-const LoginPage = ({ setUserRole }) => {
+const LoginPage = ({ setUserRole, userRole }) => {
   const [errors, setErrors] = useState({});
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const navigate = useNavigate();
+  useEffect(() => {
+    if (userRole !== null) {
+      navigate("/");
+    }
+  }, [userRole]);
 
   const handleErrors = (field, message) => {
     setErrors((prevErrors) => ({

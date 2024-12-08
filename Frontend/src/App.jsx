@@ -17,21 +17,21 @@ import "./App.css";
 
 function App() {
   const [userRole, setUserRole] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // useEffect(() => {
-  //   const token = localStorage.getItem("authToken");
-  //
-  //   if (token) {
-  //     try {
-  //       const decodedToken = jwtDecode(token);
-  //       setUserRole(decodedToken.role); // Set the user role
-  //     } catch (error) {
-  //       console.error("Invalid token:", error);
-  //     }
-  //   }
-  //   setLoading(false); // Stop loading
-  // }, []);
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+
+    if (token) {
+      try {
+        const decodedToken = jwtDecode(token);
+        setUserRole(decodedToken.role); // Set the user role
+      } catch (error) {
+        console.error("Invalid token:", error);
+      }
+    }
+    setLoading(false); // Stop loading
+  }, []);
 
   if (loading) {
     return <div>Loading...</div>; // Display a loading spinner
@@ -41,7 +41,10 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* Public Routes */}
-        <Route path="login" element={<LoginPage setUserRole={setUserRole} />} />
+        <Route
+          path="login"
+          element={<LoginPage setUserRole={setUserRole} userRole={userRole} />}
+        />
         <Route path="register" element={<SignupPage />} />
 
         {/* Protected Routes */}

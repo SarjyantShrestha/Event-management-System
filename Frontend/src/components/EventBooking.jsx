@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import EventBookingCalendar from "./EventBC";
+import TimeSlotSelection from "./TimeSlotSelection";
 
 const EventBooking = () => {
   const venues = [
@@ -27,25 +29,6 @@ const EventBooking = () => {
     });
   };
 
-  // Handle form submission
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-  //   // Simulate a booking submission (in a real app, you can send this to a server)
-  //   console.log("Event Booking Submitted:", eventDetails);
-
-  //   // Optionally, reset the form after submission
-  //   setEventDetails({
-  //     eventName: "",
-  //     venue: "",
-  //     startDate: "",
-  //     endDate: "",
-  //     startTime: "",
-  //     endTime: "",
-  //     participants: 1,
-  //   });
-
-  //   alert("Event booked successfully!");
-  // };
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -57,17 +40,17 @@ const EventBooking = () => {
       const data = await response.json();
       if (response.ok) {
         // Reset the form after successful submission
-    setEventDetails({
-      eventName: "",
-      venue: "",
-      startDate: "",
-      endDate: "",
-      startTime: "",
-      endTime: "",
-      participants: 1,
-    });
+        setEventDetails({
+          eventName: "",
+          venue: "",
+          startDate: "",
+          endDate: "",
+          startTime: "",
+          endTime: "",
+          participants: 1,
+        });
 
-    alert("Event booked successfully!");
+        alert("Event booked successfully!");
       } else {
         alert(data.message || "Booking failed.");
       }
@@ -75,7 +58,7 @@ const EventBooking = () => {
       console.error("Error booking event:", error);
     }
   };
-  
+
   return (
     <div className="event-booking-container max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
       <h1 className="text-2xl font-bold mb-6 text-center">Event Booking</h1>
@@ -118,11 +101,11 @@ const EventBooking = () => {
           </select>
         </div>
 
-        {/* Start Date and Time */}
+        {/* Start Date and Time
         <div className="flex gap-4">
-          <div className="form-group flex-1">
-            <label htmlFor="startDate" className="block text-gray-700">
-              Start Date
+          <div className="form-group w-1/2">
+            <label htmlFor="startDate" className="block text-gray-700 w-1/2">
+              Date
             </label>
             <input
               type="date"
@@ -134,56 +117,16 @@ const EventBooking = () => {
               required
             />
           </div>
-
-          <div className="form-group flex-1">
-            <label htmlFor="startTime" className="block text-gray-700">
-              Start Time
-            </label>
-            <input
-              type="time"
-              id="startTime"
-              name="startTime"
-              value={eventDetails.startTime}
-              onChange={handleInputChange}
-              className="w-full p-2 border rounded"
-              required
-            />
+        </div>
+ */}
+        <div className="flex space-x-8">
+          <div className="w-1/2">
+            <EventBookingCalendar />
+          </div>
+          <div className="w-1/2">
+            <TimeSlotSelection />
           </div>
         </div>
-
-        <div className="flex gap-4">
-          {/* End Date and Time */}
-          <div className="form-group flex-1">
-            <label htmlFor="endDate" className="block text-gray-700">
-              End Date
-            </label>
-            <input
-              type="date"
-              id="endDate"
-              name="endDate"
-              value={eventDetails.endDate}
-              onChange={handleInputChange}
-              className="w-full p-2 border rounded"
-              required
-            />
-          </div>
-
-          <div className="form-group flex-1">
-            <label htmlFor="endTime" className="block text-gray-700">
-              End Time
-            </label>
-            <input
-              type="time"
-              id="endTime"
-              name="endTime"
-              value={eventDetails.endTime}
-              onChange={handleInputChange}
-              className="w-full p-2 border rounded"
-              required
-            />
-          </div>
-        </div>
-
         {/* Number of Participants */}
         <div className="form-group">
           <label htmlFor="participants" className="block text-gray-700">
