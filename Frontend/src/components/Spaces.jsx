@@ -1,52 +1,45 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SpaceForm from "./Spaces/SpaceForm";
-import img from "../assets/venue.webp";
+import axios from "axios";
+// import img from "../assets/venue.webp";
 
 const ManageSpaces = () => {
-  const [spaces, setSpaces] = useState([
-    {
-      name: "Conference Room A",
-      location: "Building 1",
-      capacity: 20,
-      price: 100,
-      image: img, // Placeholder image
-    },
-    {
-      name: "Banquet Hall",
-      location: "Building 2",
-      capacity: 100,
-      price: 500,
-      image: img,
-    },
-    {
-      name: "Meeting Pod",
-      location: "Building 3",
-      capacity: 5,
-      price: 50,
-      image: img,
-    },
-  ]);
-
+  const [venue, setVenue] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSpace, setEditingSpace] = useState(null);
 
-  const handleAddSpace = (newSpace) => {
-    if (editingSpace !== null) {
-      const updatedSpaces = spaces.map((space, index) =>
-        index === editingSpace.index ? newSpace : space,
+  const handleDelete = async (venueId) => {
+    try {
+      const response = await axios.delete(
+        `http://localhost:5000/api/venues?venueId=${venueId}`,
       );
-      setSpaces(updatedSpaces);
-    } else {
-      setSpaces([...spaces, newSpace]);
+
+      if (response.status !== 200) {
+        console.error("Couldn't delete venue");
+      }
+
+      fetchVenue();
+    } catch (error) {
+      console.log(error.message);
     }
-    setIsModalOpen(false);
-    setEditingSpace(null);
   };
 
-  const handleDeleteSpace = (index) => {
-    const updatedSpaces = spaces.filter((_, i) => i !== index);
-    setSpaces(updatedSpaces);
+  const fetchVenue = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/api/venues");
+
+      if (response.status !== 200) {
+        throw new Error("Failed to fetch venues.");
+      }
+
+      setVenue(response.data);
+    } catch (error) {
+      console.log(error.message);
+    }
   };
+  useEffect(() => {
+    fetchVenue();
+  }, []);
 
   return (
     <div className="max-w-6xl mx-auto p-8 bg-gray-100 rounded-lg shadow-lg">
@@ -67,47 +60,40 @@ const ManageSpaces = () => {
         <table className="table-auto w-full text-left">
           <thead className="bg-gray-200">
             <tr className="text-center">
-              <th className="px-6 py-3 font-semibold">Image</th>
               <th className="px-6 py-3 font-semibold">Name</th>
-              <th className="px-6 py-3 font-semibold">Location</th>
               <th className="px-6 py-3 font-semibold">Capacity</th>
+              <th className="px-6 py-3 font-semibold">Location</th>
               <th className="px-6 py-3 font-semibold">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {spaces.map((space, index) => (
-              <tr key={index} className="hover:bg-gray-100 border-t">
-                <td className="px-6 py-4 flex justify-center">
-                  <img
-                    src={space.image}
-                    alt={space.name}
-                    className="w-24 h-24 object-cover rounded"
-                  />
-                </td>
-                <td className="px-6 py-4 text-center">{space.name}</td>
-                <td className="px-6 py-4 text-center ">{space.location}</td>
-                <td className="px-6 py-4 text-center">{space.capacity}</td>
-                <td className="px-6 py-4 text-center">
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => {
-                        setEditingSpace({ ...space, index });
-                        setIsModalOpen(true);
-                      }}
-                      className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteSpace(index)}
-                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {venue &&
+              venue.map((venue, index) => (
+                <tr key={venue.venueId} className="hover:bg-gray-100 border-t">
+                  <td className="px-6 py-4 text-center">{venue.venueName}</td>
+                  <td className="px-6 py-4 text-center">{venue.capacity}</td>
+                  <td className="px-6 py-4 text-center">{venue.location}</td>
+                  <td className="px-6 py-4 text-center">
+                    <div className="flex space-x-2 justify-center">
+                      <button
+                        onClick={() => {
+                          setEditingSpace({ ...venue, index });
+                          setIsModalOpen(true);
+                        }}
+                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(venue.venueId)}
+                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>
@@ -119,10 +105,7 @@ const ManageSpaces = () => {
             <h2 className="text-2xl font-bold mb-4">
               {editingSpace ? "Edit Venue" : "Add New Venue"}
             </h2>
-            <SpaceForm
-              onAddSpace={handleAddSpace}
-              initialData={editingSpace || {}}
-            />
+            <SpaceForm setVenue={setVenue} venue={venue} />
             <button
               onClick={() => {
                 setIsModalOpen(false);

@@ -6,6 +6,8 @@ import "reflect-metadata"
 import { AppDataSource } from './initializers/data-source'
 import AuthRouter from './routes/authRoutes'
 import UserRouter from './routes/userRoutes'
+import VenueRouter from './routes/venueRoutes'
+// import BookingRouter from './routes/bookingRoutes.bak'
 
 
 
@@ -20,6 +22,8 @@ app.use(express.urlencoded({ extended: true }))
 
 app.use('/api/auth', AuthRouter)
 app.use('/api/users', UserRouter)
+app.use('/api/venues', VenueRouter)
+// app.use('/api/bookings', BookingRouter)
 
 // initiatlizing db & starting server
 AppDataSource.initialize()

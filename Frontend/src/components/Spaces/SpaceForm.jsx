@@ -1,27 +1,39 @@
 import React, { useState } from "react";
+import axios from "axios";
 
-const SpaceForm = ({ onAddSpace }) => {
+const SpaceForm = ({ setVenue, venue }) => {
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
   const [capacity, setCapacity] = useState("");
-  const [price, setPrice] = useState("");
-  const [image, setImage] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const newSpace = { name, location, capacity, price, image };
-    onAddSpace(newSpace); // Pass data to parent
-    setName("");
-    setLocation("");
-    setCapacity("");
-    setPrice("");
-    setImage("");
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/venues/",
+        { name, location, capacity },
+        {
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+
+      const data = response.data.data;
+      setVenue([...venue, data]);
+
+      if (response.status === 200) {
+        alert("Venue added Successfully.");
+      } else {
+        alert(data.message || "Venue failed to add");
+      }
+    } catch (error) {
+      alert("An error occurred. Please try again.");
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-gray-700">Space Name:</label>
+        <label className="block text-gray-700">Venue Name:</label>
         <input
           type="text"
           value={name}
@@ -50,26 +62,10 @@ const SpaceForm = ({ onAddSpace }) => {
           required
         />
       </div>
-      <div>
-        <label className="block text-gray-700">Price ($):</label>
-        <input
-          type="number"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-          className="w-full p-2 border rounded"
-          required
-        />
-      </div>
-      <div>
-        <label className="block text-gray-700">Image URL:</label>
-        <input
-          type="text"
-          value={image}
-          onChange={(e) => setImage(e.target.value)}
-          className="w-full p-2 border rounded"
-        />
-      </div>
-      <button type="submit" className="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+      <button
+        type="submit"
+        className="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+      >
         Save Venue
       </button>
     </form>
@@ -77,4 +73,3 @@ const SpaceForm = ({ onAddSpace }) => {
 };
 
 export default SpaceForm;
-

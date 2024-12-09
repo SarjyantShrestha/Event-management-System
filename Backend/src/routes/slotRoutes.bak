@@ -1,0 +1,12 @@
+import express from "express";
+import verifyRole from "middleware/verifyRole";
+import { createSlot, getByVenue, getByEvent, updateStatus } from "../controllers/venueController"
+
+const router = express.Router();
+
+router.post('/', createSlot);
+router.get('/venue/:venueId', getByVenue);
+router.get('/event/:eventId', getByEvent);
+router.patch('/:id/status', authenticate, verifyRole(['admin']), updateStatus);
+
+export default router;

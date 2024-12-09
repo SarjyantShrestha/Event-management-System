@@ -12,7 +12,6 @@ export const register = async (req: Request, res: Response) => {
   try {
     // Check if user exists
     const userExist = await userRepo.findOne({ where: { email: email } });
-
     if (userExist) {
       return res.status(400).json({ message: "User already exists" });
     }

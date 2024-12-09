@@ -54,6 +54,7 @@ function App() {
             {/* Shared Routes */}
             <Route path="events-calendar" element={<EventsCalendar />} />
             <Route path="event-booking" element={<EventBooking />} />
+            <Route path="profile" element={<Profile user={userData} />} />
 
             {/* Admin-Only Routes */}
             <Route
@@ -64,7 +65,6 @@ function App() {
               <Route path="user-details" element={<UserDetails />} />
               <Route path="spaces" element={<ManageSpaces />} />
               <Route path="manage-events" element={<ManageEvent />} />
-              <Route path="profile" element={<Profile user={userData} />} />
             </Route>
           </Route>
         </Route>

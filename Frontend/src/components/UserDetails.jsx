@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 const UserTable = ({ onUserSelect }) => {
   const [users, setUsers] = useState([]);
@@ -6,20 +7,19 @@ const UserTable = ({ onUserSelect }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchUsers = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/users", {
-          method: "GET",
+        const response = await axios.get("http://localhost:5000/api/users", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
         });
 
-        if (!response.ok) {
+        if (response.status !== 200) {
           throw new Error("Failed to fetch users.");
         }
 
-        const data = await response.json();
+        const data = response.data;
         setUsers(data);
       } catch (error) {
         setError(error.message);
@@ -27,15 +27,15 @@ const UserTable = ({ onUserSelect }) => {
         setLoading(false);
       }
     };
-    fetchData();
+    fetchUsers();
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>; // Show loading message
+    return <div>Loading...</div>;
   }
 
   if (error) {
-    return <div>Error: {error}</div>; // Show error message
+    return <div>Error: {error}</div>;
   }
 
   return (
@@ -62,10 +62,10 @@ const UserTable = ({ onUserSelect }) => {
         </thead>
         <tbody className="divide-y divide-gray-200">
           {users.map((user) => (
-            <tr key={user.user_id}>
+            <tr key={user.userId}>
               {/*<td className="px-6 py-4 whitespace-nowrap">{user.user_id}</td>*/}
               <td className="px-6 py-4 whitespace-nowrap">
-                {user.firstname} {user.lastname}
+                {user.firstName} {user.lastName}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">{user.email}</td>
               <td className="px-6 py-4 whitespace-nowrap">
