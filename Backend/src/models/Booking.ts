@@ -15,6 +15,9 @@ export class Booking {
   @JoinColumn({ name: "user_id" })
   user: User;
 
+  @Column({ type: "varchar", length: 100 })
+  eventName: string;
+
   @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   createdAt: Date;
 

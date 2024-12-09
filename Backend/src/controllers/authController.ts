@@ -22,8 +22,8 @@ export const register = async (req: Request, res: Response) => {
 
     // Insert user into database
     const user = userRepo.create({
-      firstname: firstname,
-      lastname: lastname,
+      firstName: firstname,
+      lastName: lastname,
       email: email,
       password: hashedPassword,
       role: role || "user",
@@ -62,7 +62,7 @@ export const login = async (req: Request, res: Response) => {
       {
         userId: user.userId,
         role: user.role,
-        username: user.firstname,
+        username: user.firstName,
       },
       process.env.JWT_SECRET,
       { expiresIn: "1h" },

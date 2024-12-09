@@ -1,6 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm";
 import { Venue } from "./Venue";
-import { Event } from "./Event";
 
 @Entity("slots")
 export class Slot {
@@ -8,12 +7,8 @@ export class Slot {
   slotId: number;
 
   @ManyToOne(() => Venue, (venue) => venue.venueId, { onDelete: "CASCADE" })
-  @JoinColumn({ name: "venue_id" })
+  @JoinColumn({ name: "venueId" })
   venue: Venue;
-
-  @ManyToOne(() => Event, (event) => event.eventId, { onDelete: "CASCADE" })
-  @JoinColumn({ name: "event_id" })
-  event: Event;
 
   @Column({ type: "date" })
   date: string;

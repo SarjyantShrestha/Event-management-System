@@ -1,7 +1,6 @@
 import { DataSource } from "typeorm"
 import { User } from "../models/User"
 import { Venue } from "../models/Venue"
-import { Event } from "../models/Event"
 import { Slot } from "../models/Slot"
 import { Booking } from "../models/Booking"
 import dotenv from "dotenv"
@@ -17,7 +16,7 @@ export const AppDataSource = new DataSource({
     synchronize: true,
     logging: false,
     entities: [
-        User, Venue, Event, Slot, Booking
+        User, Venue, Slot, Booking
     ],
     subscribers: [],
     migrations: [],
