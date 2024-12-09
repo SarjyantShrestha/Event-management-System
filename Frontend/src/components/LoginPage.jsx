@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router";
 import { jwtDecode } from "jwt-decode";
+import { UserContext } from "../contexts/UserContext";
 
 const LoginPage = ({ setUserRole, userRole }) => {
   const [errors, setErrors] = useState({});
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { setUsername } = useContext(UserContext);
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -59,6 +61,7 @@ const LoginPage = ({ setUserRole, userRole }) => {
         localStorage.setItem("authToken", data.token);
         const decodedToken = jwtDecode(data.token);
         setUserRole(decodedToken.role);
+        setUsername(decodedToken.username);
 
         navigate("/");
       } else {

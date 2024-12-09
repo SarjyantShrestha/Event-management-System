@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { Outlet, Link } from "react-router";
+import React, { useState, useEffect, useContext } from "react";
+import { Outlet, Link, useNavigate } from "react-router";
 import navLinks from "../constants/index";
-import { useNavigate } from "react-router";
 import { jwtDecode } from "jwt-decode";
+import { UserContext } from "../contexts/UserContext";
 
 const MainLayout = () => {
   const [userRole, setUserRole] = useState(null);
-  // const [userName, setUserName] = useState("");
+  const { username } = useContext(UserContext);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,7 +27,7 @@ const MainLayout = () => {
     };
 
     fetchUserRole();
-  }, []);
+  }, [userRole]);
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
@@ -40,9 +40,9 @@ const MainLayout = () => {
     : [];
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen overflow-hidden">
       {/* Sidebar */}
-      <div className="bg-blue-500 w-60 text-white flex flex-col p-5">
+      <div className="bg-blue-500 w-60 text-white flex flex-col p-5 fixed h-screen">
         <div className="flex justify-between items-center mb-10 px-2">
           <h1 className="text-xl font-bold">Event Space</h1>
           <button className="text-lg font-bold hover:text-gray-300">
@@ -65,26 +65,25 @@ const MainLayout = () => {
         </ul>
       </div>
 
-      {/* Top bar */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col ml-60">
         {/* Top Navbar */}
-        <div className="bg-blue-400 h-16 text-white flex items-center justify-end px-10 space-x-7">
-          <div className="text-lg">
-            Welcome,
-            <span className="font-bold">
-              {userRole === "admin" ? "Admin" : "User"}
-            </span>
+        <div className="bg-blue-400 h-16 text-white flex items-center justify-end px-10  relative w-full z-10">
+          <div className="absolute flex flex-row items-center space-x-7">
+            <div className="text-lg">
+              <span>Welcome, </span>
+              <span className="font-bold">{username}</span>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="bg-red-500 px-4 py-2 rounded text-white hover:bg-red-600"
+            >
+              Logout
+            </button>
           </div>
-          <button
-            onClick={handleLogout}
-            className="bg-red-500 px-4 py-2 rounded text-white hover:bg-red-600"
-          >
-            Logout
-          </button>
         </div>
 
         {/* Dynamic Content */}
-        <div className="p-5">
+        <div className="pt-5 px-5 overflow-y-auto h-screen">
           <Outlet />
         </div>
       </div>

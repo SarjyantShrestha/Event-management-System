@@ -30,11 +30,11 @@ function App() {
         console.error("Invalid token:", error);
       }
     }
-    setLoading(false); // Stop loading
+    setLoading(false);
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>; // Display a loading spinner
+    return <div>Loading...</div>;
   }
 
   return (

@@ -169,12 +169,10 @@ app.delete("/api/event-bookings/:calendar_id", async (req, res) => {
 
     // Commit the transaction if both deletions were successful
     await client.query("COMMIT");
-    res
-      .status(200)
-      .json({
-        message:
-          "Event deleted successfully from both EventBookings and EventCalendar",
-      });
+    res.status(200).json({
+      message:
+        "Event deleted successfully from both EventBookings and EventCalendar",
+    });
   } catch (error) {
     // In case of an error, rollback the transaction
     await client.query("ROLLBACK");
