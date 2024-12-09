@@ -1,6 +1,6 @@
 import express from "express";
-import { getSingleUser, getAllUsers } from "../controllers/userController.js";
-import verifyRole from "../middleware/verifyRole.js";
+import { getSingleUser, getAllUsers } from "../controllers/userController";
+import verifyRole from "../middleware/verifyRole";
 
 const router = express.Router();
 
