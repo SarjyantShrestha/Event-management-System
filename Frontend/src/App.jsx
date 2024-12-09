@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useContext } from "react";
 import { BrowserRouter, Routes, Route } from "react-router";
 import LoginPage from "./components/LoginPage";
 import SignupPage from "./components/SignupPage";
@@ -12,39 +12,17 @@ import ManageSpaces from "./components/Spaces";
 import ManageEvent from "./components/ManageEvent";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ErrorPage from "./components/ErrorPage";
-import { jwtDecode } from "jwt-decode";
 import "./App.css";
+import { UserContext } from "./contexts/UserContext";
 
 function App() {
-  const [userRole, setUserRole] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const token = localStorage.getItem("authToken");
-
-    if (token) {
-      try {
-        const decodedToken = jwtDecode(token);
-        setUserRole(decodedToken.role); // Set the user role
-      } catch (error) {
-        console.error("Invalid token:", error);
-      }
-    }
-    setLoading(false);
-  }, []);
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  const { userrole } = useContext(UserContext);
 
   return (
     <BrowserRouter>
       <Routes>
         {/* Public Routes */}
-        <Route
-          path="login"
-          element={<LoginPage setUserRole={setUserRole} userRole={userRole} />}
-        />
+        <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<SignupPage />} />
 
         {/* Protected Routes */}
@@ -52,7 +30,7 @@ function App() {
           element={
             <ProtectedRoute
               allowedRoles={["admin", "user"]}
-              userRole={userRole}
+              userRole={userrole}
             />
           }
         >
@@ -61,7 +39,7 @@ function App() {
             <Route
               path="/"
               element={
-                userRole === "admin" ? <DashboardAdmin /> : <DashboardUser />
+                userrole === "admin" ? <DashboardAdmin /> : <DashboardUser />
               }
             />
 
@@ -72,7 +50,7 @@ function App() {
             {/* Admin-Only Routes */}
             <Route
               element={
-                <ProtectedRoute allowedRoles={["admin"]} userRole={userRole} />
+                <ProtectedRoute allowedRoles={["admin"]} userRole={userrole} />
               }
             >
               <Route path="user-details" element={<UserDetails />} />

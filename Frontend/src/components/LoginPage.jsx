@@ -3,18 +3,18 @@ import { useNavigate } from "react-router";
 import { jwtDecode } from "jwt-decode";
 import { UserContext } from "../contexts/UserContext";
 
-const LoginPage = ({ setUserRole, userRole }) => {
+const LoginPage = () => {
   const [errors, setErrors] = useState({});
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { setUsername } = useContext(UserContext);
+  const { setUsername, setUserrole, userrole } = useContext(UserContext);
 
   const navigate = useNavigate();
   useEffect(() => {
-    if (userRole !== null) {
+    if (userrole !== null) {
       navigate("/");
     }
-  }, [userRole]);
+  }, [userrole]);
 
   const handleErrors = (field, message) => {
     setErrors((prevErrors) => ({
@@ -60,7 +60,7 @@ const LoginPage = ({ setUserRole, userRole }) => {
       if (response.ok) {
         localStorage.setItem("authToken", data.token);
         const decodedToken = jwtDecode(data.token);
-        setUserRole(decodedToken.role);
+        setUserrole(decodedToken.role);
         setUsername(decodedToken.username);
 
         navigate("/");

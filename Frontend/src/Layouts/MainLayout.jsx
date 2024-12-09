@@ -6,7 +6,7 @@ import { UserContext } from "../contexts/UserContext";
 
 const MainLayout = () => {
   const [userRole, setUserRole] = useState(null);
-  const { username } = useContext(UserContext);
+  const { username, logout } = useContext(UserContext);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,10 +29,10 @@ const MainLayout = () => {
     fetchUserRole();
   }, [userRole]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    navigate("/login");
-  };
+  // const handleLogout = () => {
+  //   localStorage.removeItem("authToken");
+  //   navigate("/login");
+  // };
 
   // Filter navLinks based on userRole
   const filteredNavLinks = userRole
@@ -74,7 +74,7 @@ const MainLayout = () => {
               <span className="font-bold">{username}</span>
             </div>
             <button
-              onClick={handleLogout}
+              onClick={logout}
               className="bg-red-500 px-4 py-2 rounded text-white hover:bg-red-600"
             >
               Logout
