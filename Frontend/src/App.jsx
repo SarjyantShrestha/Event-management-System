@@ -12,11 +12,19 @@ import ManageSpaces from "./components/Spaces";
 import ManageEvent from "./components/ManageEvent";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ErrorPage from "./components/ErrorPage";
-import "./App.css";
 import { UserContext } from "./contexts/UserContext";
+import Profile from "./components/Profile";
+import "./App.css";
 
 function App() {
   const { userrole } = useContext(UserContext);
+
+  const userData = {
+    name: "John Doe",
+    email: "johndoe@example.com",
+    role: "Organizer",
+    joinedAt: "2023-05-15T12:00:00Z",
+  };
 
   return (
     <BrowserRouter>
@@ -56,6 +64,7 @@ function App() {
               <Route path="user-details" element={<UserDetails />} />
               <Route path="spaces" element={<ManageSpaces />} />
               <Route path="manage-events" element={<ManageEvent />} />
+              <Route path="profile" element={<Profile user={userData} />} />
             </Route>
           </Route>
         </Route>

@@ -41,6 +41,13 @@ const navLinks = [
     icon: "fas fa-calendar-check",
     roles: ["admin"],
   },
+  {
+    id: 7,
+    name: "Profile",
+    path: "/profile",
+    icon: "fas fa-user",
+    roles: ["admin", "user"],
+  },
 ];
 
 export default navLinks;
