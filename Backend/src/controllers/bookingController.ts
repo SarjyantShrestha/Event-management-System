@@ -36,12 +36,23 @@ export const createBooking = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Venue not found" });
     }
 
-    // Find the slot
-    const slot = await slotRepo.findOne({
-      where: { slotTime: slotTime },
-    });
+    // Check if a slot already exists for the given date, time, and venue
+    let slot = await slotRepo.findOne({ where: { date, slotTime, venue } });
+
     if (slot) {
-      return res.status(404).json({ error: "Slot not available" });
+      // If slot exists, check if it's available
+      if (slot.status !== "available") {
+        return res.status(404).json({ error: "Slot not available" });
+      }
+    } else {
+      // If slot does not exist, create a new one
+      slot = slotRepo.create({
+        date,
+        slotTime,
+        venue,
+        status: "available",
+      });
+      await slotRepo.save(slot);
     }
 
     // Create the booking
@@ -53,7 +64,7 @@ export const createBooking = async (req: Request, res: Response) => {
 
     // Save the booking and update the slot status
     await bookingRepo.save(newBooking);
-    slot.status = "booked";
+    slot.status = "pending";
     await slotRepo.save(slot);
 
     res.status(201).json({ message: "Booking created successfully", booking: newBooking });
@@ -65,7 +76,7 @@ export const createBooking = async (req: Request, res: Response) => {
 
 export const getMyBookings = async (req: Request, res: Response) => {
   try {
-    const { user_id } = req.params; // Fetch user_id from route params (e.g., /bookings/:user_id)
+    const user_id = res.locals.userId; // Fetch user_id from route params (e.g., /bookings/:user_id)
 
     if (!user_id) {
       return res.status(400).json({ error: "User ID is required" });
