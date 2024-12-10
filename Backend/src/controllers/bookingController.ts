@@ -18,7 +18,7 @@ export const createBooking = async (req: Request, res: Response) => {
     if (!userId) {
       return res.status(401).json({ error: "Unauthorized: User not authenticated" });
     }
-    const { eventName, date, slotTime, venueName, capacity } = req.body;
+    const { eventName, date, slotTime, venueName, participants } = req.body;
 
     // Validate inputs
     if (!userId || !eventName || !date || !slotTime || !venueName) {
@@ -29,11 +29,16 @@ export const createBooking = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
+    
 
     // Find the venue
     const venue = await venueRepo.findOne({ where: { venueName } });
     if (!venue) {
       return res.status(404).json({ error: "Venue not found" });
+    }
+
+    if (venue.capacity < participants){
+      return res.status(404).json({ error: "Participants over the capacity of venue" });
     }
 
     // Check if a slot already exists for the given date, time, and venue
