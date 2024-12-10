@@ -13,4 +13,7 @@ export class Venue {
 
   @Column({ type: "int", nullable: true })
   capacity: number;
+
+  @Column({ type: "simple-array", nullable: true })
+  amenities: string[];
 }

@@ -7,7 +7,7 @@ const userRepo = AppDataSource.getRepository(User);
 
 // Get a user by ID
 export const getSingleUser = async (req: Request, res: Response) => {
-  const userId = req.params.user_id as string; // Extract user ID from request params
+  const userId = req.params.user_id as string;
   try {
     const user = await userRepo.findOne({ where: { userId: parseInt(userId) } })
 
