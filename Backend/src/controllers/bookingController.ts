@@ -160,3 +160,30 @@ export const getAllBookings = async (req: Request, res: Response) => {
     res.status(500).json({ error: "An internal server error occurred" });
   }
 };
+
+
+export const getSlotsByDate = async (req: Request, res: Response) => {
+  try {
+    const { date } = req.query;
+
+    // Validate date input
+    if (!date || typeof date !== "string") {
+      return res.status(400).json({ error: "A valid date string is required" });
+    }
+
+    // Fetch slots for the given date
+    const slots = await slotRepo.find({
+      relations: ["venue"],
+      where: { date },
+    });
+
+    if (!slots.length) {
+      return res.status(404).json({ message: "No slots found for this date" });
+    }
+
+    res.status(200).json(slots);
+  } catch (error) {
+    console.error("Error fetching slots by date:", error);
+    res.status(500).json({ error: "An internal server error occurred" });
+  }
+};
