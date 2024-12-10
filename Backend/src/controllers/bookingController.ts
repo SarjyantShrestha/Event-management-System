@@ -18,7 +18,7 @@ export const createBooking = async (req: Request, res: Response) => {
     if (!userId) {
       return res.status(401).json({ error: "Unauthorized: User not authenticated" });
     }
-    const { eventName, date, slotTime, venueName } = req.body;
+    const { eventName, date, slotTime, venueName, capacity } = req.body;
 
     // Validate inputs
     if (!userId || !eventName || !date || !slotTime || !venueName) {
@@ -131,9 +131,7 @@ export const deleteBooking = async (req: Request, res: Response) => {
     // Delete the booking
     await bookingRepo.remove(booking);
 
-    // Update the slot's status to "available"
-    slot.status = "available";
-    await slotRepo.save(slot);
+    await slotRepo.remove(slot);
 
     res.status(200).json({ message: "Booking deleted successfully" });
   } catch (error) {
@@ -184,6 +182,41 @@ export const getSlotsByDate = async (req: Request, res: Response) => {
     res.status(200).json(slots);
   } catch (error) {
     console.error("Error fetching slots by date:", error);
+    res.status(500).json({ error: "An internal server error occurred" });
+  }
+};
+
+
+export const getSlotsByVenueNameAndDate = async (req: Request, res: Response) => {
+  try {
+    const { date, venueName } = req.query;
+
+    // Validate inputs
+    if (!date || typeof date !== "string") {
+      return res.status(400).json({ error: "A valid date string is required" });
+    }
+    if (!venueName || typeof venueName !== "string") {
+      return res.status(400).json({ error: "A valid venue name is required" });
+    }
+    
+    // Fetch slots for the given venue name and date
+    const slots = await slotRepo.find({
+      relations: ["venue"], // Include the venue relation to access venueName
+      where: {
+        date,
+        venue: {
+          venueName, // Filter by venueName
+        },
+      },
+    });
+
+    if (!slots.length) {
+      return res.status(404).json({ message: "No slots found for this venue and date" });
+    }
+
+    res.status(200).json(slots);
+  } catch (error) {
+    console.error("Error fetching slots by venue name and date:", error);
     res.status(500).json({ error: "An internal server error occurred" });
   }
 };
