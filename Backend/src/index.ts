@@ -22,7 +22,6 @@ app.use(express.urlencoded({ extended: true }))
 app.use('/api/auth', AuthRouter)
 app.use('/api/users', UserRouter)
 app.use('/api/venues', VenueRouter)
-// app.use('/api/bookings', BookingRouter)
 app.use('/api/event', BookingRouter)
 
 // initiatlizing db & starting server

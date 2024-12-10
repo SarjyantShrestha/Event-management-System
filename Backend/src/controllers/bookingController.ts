@@ -2,9 +2,9 @@ import { User } from "../models/User";
 import { Request, Response } from "express";
 
 import { AppDataSource } from "../initializers/data-source";
-import { Booking } from "models/Booking";
-import { Slot } from "models/Slot";
-import { Venue } from "models/Venue";
+import { Booking } from "../models/Booking";
+import { Slot } from "../models/Slot";
+import { Venue } from "../models/Venue";
 
 const userRepo = AppDataSource.getRepository(User);
 const bookingRepo = AppDataSource.getRepository(Booking);
@@ -14,7 +14,7 @@ const venueRepo = AppDataSource.getRepository(Venue);
 export const createBooking = async (req: Request, res: Response) => {
   try {
     const userId = res.locals.userId;
-    
+
     if (!userId) {
       return res.status(401).json({ error: "Unauthorized: User not authenticated" });
     }
@@ -38,7 +38,7 @@ export const createBooking = async (req: Request, res: Response) => {
 
     // Find the slot
     const slot = await slotRepo.findOne({
-      where: {slotTime:slotTime},
+      where: { slotTime: slotTime },
     });
     if (slot) {
       return res.status(404).json({ error: "Slot not available" });
