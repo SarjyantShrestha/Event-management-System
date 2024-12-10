@@ -38,9 +38,9 @@ export const createBooking = async (req: Request, res: Response) => {
 
     // Find the slot
     const slot = await slotRepo.findOne({
-      where: { date, slotTime, venue, status: "available" },
+      where: {slotTime:slotTime},
     });
-    if (!slot) {
+    if (slot) {
       return res.status(404).json({ error: "Slot not available" });
     }
 
@@ -127,6 +127,25 @@ export const deleteBooking = async (req: Request, res: Response) => {
     res.status(200).json({ message: "Booking deleted successfully" });
   } catch (error) {
     console.error("Error deleting booking:", error);
+    res.status(500).json({ error: "An internal server error occurred" });
+  }
+};
+
+
+export const getAllBookings = async (req: Request, res: Response) => {
+  try {
+    // Fetch all bookings with relations to Slot, User, and Venue
+    const bookings = await bookingRepo.find({
+      relations: ["slot", "slot.venue", "user"],
+    });
+
+    if (!bookings.length) {
+      return res.status(404).json({ message: "No bookings found" });
+    }
+
+    res.status(200).json(bookings);
+  } catch (error) {
+    console.error("Error fetching bookings:", error);
     res.status(500).json({ error: "An internal server error occurred" });
   }
 };
