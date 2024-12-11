@@ -14,6 +14,17 @@ const timeSlots = [
 ];
 
 const TimeSlotSelection = ({ selectedDate, selectedSlots, onSlotSelect }) => {
+  // Check if the current slot is selected for the current date
+  const isSlotSelected = (slot) => {
+    if (!selectedDate) return false;
+
+    const startTime = slot.split(" - ")[0];
+    const dateIndex = selectedDate
+      ? selectedSlots.findIndex((slots) => slots?.includes(startTime))
+      : -1;
+
+    return dateIndex !== -1;
+  };
   return (
     <>
       <h3 className="text-xl font-semibold">
@@ -35,7 +46,7 @@ const TimeSlotSelection = ({ selectedDate, selectedSlots, onSlotSelect }) => {
               key={index}
               onClick={() => onSlotSelect(slot)}
               className={`w-full text-center p-3 rounded-lg transition-colors duration-200 ${
-                selectedSlots.includes(slot.split(" - ")[0])
+                isSlotSelected(slot)
                   ? "bg-blue-500 text-white"
                   : "bg-gray-200 text-gray-700 hover:bg-blue-100"
               }`}

@@ -32,29 +32,70 @@ const EventBooking = () => {
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
-    setEventDetails({
-      ...eventDetails,
-      date: format(date, "yyyy-MM-dd"), // Update the date field
+
+    // Check if the date is already in the array
+    const formattedDate = format(date, "yyyy-MM-dd");
+    setEventDetails((prevDetails) => {
+      // If date not already in the array, add it
+      if (!prevDetails.date.includes(formattedDate)) {
+        return {
+          ...prevDetails,
+          date: [...prevDetails.date, formattedDate],
+        };
+      }
+      return prevDetails;
     });
   };
 
-  // Handle time slot selection
   const handleSlotSelection = (slot) => {
-    const startTime = slot.split(" - ")[0]; // Extract the starting time
+    const startTime = slot.split(" - ")[0];
+
     setEventDetails((prevDetails) => {
-      const isSelected = prevDetails.slotTime.includes(startTime);
-      const updatedSlots = isSelected
-        ? prevDetails.slotTime.filter((s) => s !== startTime) // Remove if already selected
-        : [...prevDetails.slotTime, startTime]; // Add if not selected
+      // If no date selected, do nothing
+      if (!selectedDate) return prevDetails;
+
+      const formattedDate = format(selectedDate, "yyyy-MM-dd");
+
+      // Find the index of the current date
+      const dateIndex = prevDetails.date.indexOf(formattedDate);
+
+      // Create a copy of the current slotTime array
+      const updatedSlotTime = [...prevDetails.slotTime];
+
+      // If the date doesn't have any slots yet, add an empty array
+      if (dateIndex === -1) return prevDetails;
+
+      // Check if the slot is already selected for this date
+      const currentDateSlots = updatedSlotTime[dateIndex] || [];
+      const isSelected = currentDateSlots.includes(startTime);
+
+      // Update slots for the specific date
+      if (isSelected) {
+        // Remove the slot
+        updatedSlotTime[dateIndex] = currentDateSlots.filter(
+          (s) => s !== startTime,
+        );
+      } else {
+        // Add the slot
+        updatedSlotTime[dateIndex] = [...currentDateSlots, startTime];
+      }
+
       return {
         ...prevDetails,
-        slotTime: updatedSlots,
+        slotTime: updatedSlotTime,
       };
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Optional: Validate that dates and slots match
+    const isValid = eventDetails.date.length === eventDetails.slotTime.length;
+    if (!isValid) {
+      alert("Please ensure each selected date has corresponding time slots.");
+      return;
+    }
     try {
       const response = await axios.post(
         "http://localhost:5000/api/event/booking",
