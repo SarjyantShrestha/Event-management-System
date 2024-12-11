@@ -33,17 +33,35 @@ const EventBooking = () => {
   const handleDateChange = (date) => {
     setSelectedDate(date);
 
-    // Check if the date is already in the array
+    // Format the date
     const formattedDate = format(date, "yyyy-MM-dd");
+
     setEventDetails((prevDetails) => {
-      // If date not already in the array, add it
-      if (!prevDetails.date.includes(formattedDate)) {
+      // Check if the date is already selected
+      const dateIndex = prevDetails.date.indexOf(formattedDate);
+
+      if (dateIndex === -1) {
+        // Date not in the array, add it
         return {
           ...prevDetails,
           date: [...prevDetails.date, formattedDate],
+          slotTime: [...prevDetails.slotTime, []], // Add empty slot array for this date
+        };
+      } else {
+        // Date already in the array, remove it
+        const updatedDates = prevDetails.date.filter(
+          (d) => d !== formattedDate,
+        );
+        const updatedSlotTimes = prevDetails.slotTime.filter(
+          (_, index) => index !== dateIndex,
+        );
+
+        return {
+          ...prevDetails,
+          date: updatedDates,
+          slotTime: updatedSlotTimes,
         };
       }
-      return prevDetails;
     });
   };
 
@@ -90,7 +108,19 @@ const EventBooking = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Optional: Validate that dates and slots match
+    // Check if any selected dates have no time slots
+    const emptySlotDates = eventDetails.date.filter(
+      (date, index) => eventDetails.slotTime[index]?.length === 0,
+    );
+
+    if (emptySlotDates.length > 0) {
+      // Create a readable list of dates without slots
+      const datesList = emptySlotDates.join(", ");
+      alert(`Please select time slots for the following date(s): ${datesList}`);
+      return;
+    }
+
+    // Validate that dates and slots match
     const isValid = eventDetails.date.length === eventDetails.slotTime.length;
     if (!isValid) {
       alert("Please ensure each selected date has corresponding time slots.");
@@ -125,6 +155,20 @@ const EventBooking = () => {
         error.response?.data?.error || "An error occurred. Please try again.",
       );
     }
+  };
+
+  const tileClassName = ({ date, view }) => {
+    // Only add class to dates in month view
+    if (view === "month") {
+      // Convert date to ISO string format for comparison
+      const formattedDate = format(date, "yyyy-MM-dd");
+
+      // Check if this date is in the selected dates
+      if (eventDetails.date.includes(formattedDate)) {
+        return "bg-blue-200 text-blue-900 font-bold"; // Tailwind classes for highlighting
+      }
+    }
+    return null;
   };
 
   return (
@@ -190,7 +234,11 @@ const EventBooking = () => {
         {/* Calendar and Time Slot Selection */}
         <div className="flex h-80 space-x-8">
           <div className="w-1/2 flex mb-auto justify-center">
-            <Calendar onChange={handleDateChange} value={selectedDate} />
+            <Calendar
+              onChange={handleDateChange}
+              value={selectedDate}
+              tileClassName={tileClassName}
+            />
           </div>
           <div className="w-1/2">
             <TimeSlotSelection
