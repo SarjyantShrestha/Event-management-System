@@ -5,13 +5,14 @@ const ManageEvents = () => {
   const [filter, setFilter] = useState("All");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [noBookings, setNoBookings] = useState(false);
 
   // Fetch bookings from the backend
   useEffect(() => {
     const fetchBookings = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/event/my-bookings",
+          "http://localhost:5000/api/event/allbookings",
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("authToken")}`,
@@ -20,11 +21,18 @@ const ManageEvents = () => {
         );
 
         if (!response.ok) {
-          throw new Error("Failed to fetch bookings.");
+          // Check for specific 404 status for no bookings
+          if (response.status === 404) {
+            setNoBookings(true);
+            setBookings([]);
+          } else {
+            throw new Error("Failed to fetch bookings.");
+          }
+        } else {
+          const data = await response.json();
+          setBookings(data);
+          setNoBookings(false);
         }
-
-        const data = await response.json();
-        setBookings(data);
       } catch (error) {
         setError(error.message);
       } finally {
@@ -37,62 +45,71 @@ const ManageEvents = () => {
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
- // update status
+  // update status
   const updateStatus = async (bookingId, status) => {
-
     try {
-       const response = await fetch(
+      const response = await fetch(
         `http://localhost:5000/api/event/approvebooking`,
-        // Same endpoint, no need for status or bookingId in the URL
         {
-          method: "PUT", // or POST if needed
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
           body: JSON.stringify({
-            status: status, // status to be updated
-            bookingId: bookingId, // the booking ID to identify the booking
+            status: status,
+            bookingId: bookingId,
           }),
-          
-        },
-
+        }
       );
-
 
       if (response.ok) {
         const updatedBooking = await response.json();
+        console.log("Backend response:", updatedBooking);
+
         // Update the status in the local state
         setBookings((prev) =>
           prev.map((booking) =>
             booking.bookingId === bookingId
               ? {
                   ...booking,
-                  slot: { ...booking.slot, status: updatedBooking.status },
+                  slot: {
+                    ...booking.slot,
+                    status: updatedBooking?.status || status,
+                  },
                 }
               : booking
           )
         );
       } else {
-        console.error("Failed to update booking status");
+        console.error(
+          "Failed to update booking status, status code:",
+          response.status
+        );
       }
     } catch (error) {
       console.error("Error updating booking status:", error);
     }
   };
 
-  // Delete Booking
+  // delete booking
   const deleteBooking = async (bookingId) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/event/approvebooking`,
-        { method: "DELETE" }
+        `http://localhost:5000/api/event/deletebooking?bookingId=${bookingId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        }
       );
 
       if (response.ok) {
         setBookings((prev) =>
           prev.filter((booking) => booking.bookingId !== bookingId)
         );
+        console.log("Booking deleted successfully");
       } else {
         console.error("Failed to delete booking");
       }
@@ -149,44 +166,64 @@ const ManageEvents = () => {
             </tr>
           </thead>
           <tbody className="text-gray-700">
-            {filteredBookings.map((booking) => (
-              <tr
-                key={booking.bookingId}
-                className="hover:bg-gray-100 border-b"
-              >
-                <td className="py-4 px-6 text-center">{booking.eventName}</td>
-                <td className="py-4 px-6 text-center">
-                  {booking.slot.venue.venueName || "N/A"}
-                </td>
-                <td className="py-4 px-6 text-center">
-                  {booking.slot.date} - {booking.slot.slotTime}
-                </td>
-                <td className="py-4 px-6 text-center">
-                  {booking.slot.date} - {booking.slot.slotTime}
-                </td>
-                <td className="py-4 px-6 text-center">{booking.slot.status}</td>
-                <td className="py-4 px-6 flex justify-center space-x-3">
-                  <button
-                    onClick={() => updateStatus(booking.bookingId, "approved")}
-                    className="text-green-500 hover:text-green-700"
-                  >
-                    Approve
-                  </button>
-                  <button
-                    onClick={() => updateStatus(booking.bookingId, "denied")}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    Deny
-                  </button>
-                  <button
-                    onClick={() => deleteBooking(booking.bookingId)}
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    Delete
-                  </button>
+            {noBookings ? (
+              <tr>
+                <td 
+                  colSpan="6" 
+                  className="text-center py-8 text-gray-500 text-xl"
+                >
+                  No bookings found
                 </td>
               </tr>
-            ))}
+            ) : filteredBookings.length > 0 ? (
+              filteredBookings.map((booking) => (
+                <tr
+                  key={booking.bookingId}
+                  className="hover:bg-gray-100 border-b"
+                >
+                  <td className="py-4 px-6 text-center">{booking.eventName}</td>
+                  <td className="py-4 px-6 text-center">
+                    {booking.slot.venue.venueName || "N/A"}
+                  </td>
+                  <td className="py-4 px-6 text-center">
+                    {booking.slot.date} - {booking.slot.slotTime}
+                  </td>
+                  <td className="py-4 px-6 text-center">
+                    {booking.slot.date} - {booking.slot.slotTime}
+                  </td>
+                  <td className="py-4 px-6 text-center">{booking.slot.status}</td>
+                  <td className="py-4 px-6 flex justify-center space-x-3">
+                    <button
+                      onClick={() => updateStatus(booking.bookingId, "approved")}
+                      className="text-green-500 hover:text-green-700"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      onClick={() => updateStatus(booking.bookingId, "denied")}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      Deny
+                    </button>
+                    <button
+                      onClick={() => deleteBooking(booking.bookingId)}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td 
+                  colSpan="6" 
+                  className="text-center py-8 text-gray-500 text-xl"
+                >
+                  No bookings match the current filter
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

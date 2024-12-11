@@ -150,7 +150,7 @@ export const deleteBooking = async (req: Request, res: Response) => {
     }
 
     // Convert bookingId to a number
-    const bookingId = parseInt(req.params.bookingId, 10);
+    const bookingId = parseInt(req.query.bookingId as string, 10);
 
     if (isNaN(bookingId)) {
       return res.status(400).json({ error: "Invalid booking ID" });
