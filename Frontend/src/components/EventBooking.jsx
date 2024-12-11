@@ -145,6 +145,22 @@ const EventBooking = () => {
             ))}
           </select>
         </div>
+
+        {/* Calendar and Time Slot Selection */}
+        <div className="flex h-80 space-x-8">
+          <div className="w-1/2 flex mb-auto justify-center">
+            <Calendar onChange={handleDateChange} value={selectedDate} />
+          </div>
+          <div className="w-1/2">
+            <TimeSlotSelection
+              selectedDate={selectedDate}
+              selectedSlots={eventDetails.slotTime}
+              onSlotSelect={handleSlotSelection}
+            />
+          </div>
+        </div>
+
+        {/* Submit Button - Now part of the form and below the calendar/time slot section */}
         <button
           type="submit"
           className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -152,22 +168,6 @@ const EventBooking = () => {
           Book Event
         </button>
       </form>
-
-      {/* Calendar and Time Slot Selection */}
-      <div className="flex h-80 space-x-8">
-        <div className="w-1/2 flex mb-auto justify-center">
-          <Calendar onChange={handleDateChange} value={selectedDate} />
-        </div>
-        <div className="w-1/2">
-          <TimeSlotSelection
-            selectedDate={selectedDate}
-            selectedSlots={eventDetails.slotTime}
-            onSlotSelect={handleSlotSelection}
-          />
-        </div>
-      </div>
-
-      {/* Submit Button */}
     </div>
   );
 };

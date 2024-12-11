@@ -31,6 +31,7 @@ const TimeSlotSelection = ({ selectedDate, selectedSlots, onSlotSelect }) => {
         <div className="space-y-2 px-10">
           {timeSlots.map((slot, index) => (
             <button
+              type="button"
               key={index}
               onClick={() => onSlotSelect(slot)}
               className={`w-full text-center p-3 rounded-lg transition-colors duration-200 ${
