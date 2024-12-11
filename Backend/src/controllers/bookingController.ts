@@ -18,18 +18,8 @@ export const createBooking = async (req: Request, res: Response) => {
     if (!userId) {
       return res.status(401).json({ error: "Unauthorized: User not authenticated" });
     }
-    const { eventName, date, slotTime, venueName, participants } = req.body;
 
-    // Validate inputs
-    if (!userId || !eventName || !date || !slotTime || !venueName) {
-      return res.status(400).json({ error: "All fields are required" });
-    }
-    // Find the user
-    const user = await userRepo.findOne({ where: { userId } });
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-    
+    const { date, slotTime, eventName, venueName, participants } = req.body;
 
     // Find the venue
     const venue = await venueRepo.findOne({ where: { venueName } });
@@ -37,47 +27,182 @@ export const createBooking = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Venue not found" });
     }
 
-    if (venue.capacity < participants){
+    if (venue.capacity < participants) {
       return res.status(404).json({ error: "Participants over the capacity of venue" });
     }
+    // Validate input
+    if (!Array.isArray(date) || !Array.isArray(slotTime)) {
+      return res.status(400).json({ error: "Date and slotTime must be arrays of the same length" });
+    }
+    
+    if (!eventName || typeof eventName !== "string") {
+      return res.status(400).json({ error: "A valid eventName is required" });
+    }
+    
+    // Retrieve the user from the request (assuming middleware sets user)
+    const user = await userRepo.findOne({where:{userId}});
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    const currentDate = new Date();
+    const bookings = [];
+    
+    // Process each date with its corresponding slot times
+    for (let i = 0; i < date.length; i++) {
+      const bookingDate = new Date(date[i]);
 
-    // Check if a slot already exists for the given date, time, and venue
-    let slot = await slotRepo.findOne({ where: { date, slotTime, venue } });
-
-    if (slot) {
-      // If slot exists, check if it's available
-      if (slot.status !== "available") {
-        return res.status(404).json({ error: "Slot not available" });
+      // Skip dates in the past
+      if (bookingDate < currentDate) {
+        continue;
       }
-    } else {
-      // If slot does not exist, create a new one
-      slot = slotRepo.create({
-        date,
-        slotTime,
-        venue,
-        status: "available",
-      });
-      await slotRepo.save(slot);
+
+      // Process each slot time for the current date
+      for (let j = 0; j < slotTime[i].length; j++) {
+        if (!bookingDate || !slotTime[i][j]) {
+          return res.status(400).json({
+            error: `Invalid date or slot time provided: date=${bookingDate}, time=${slotTime[i][j]}`,
+          });
+        }
+        let slot = await slotRepo.findOne({
+            where: { date: date[i], slotTime: slotTime[i][j] },
+            relations: ["venue"],
+          });
+        
+
+        if (slot) {
+          // If slot exists but is not available, return an error
+          if (slot.status !== "available") {
+            return res.status(404).json({
+              error: `Slot not available for date: ${date[i]}, time: ${slotTime[i][j]}`,
+            });
+          }
+        } else {
+          // If slot does not exist, create it
+          slot = slotRepo.create({
+            date: date[i],
+            slotTime: slotTime[i][j],
+            status: "available",
+          });
+          await slotRepo.save(slot);
+        }
+
+        // Create the booking
+        const newBooking = bookingRepo.create({
+          user,
+          slot,
+          eventName,
+        });
+
+        // Save the booking and update the slot status
+        await bookingRepo.save(newBooking);
+        slot.status = "pending";
+        await slotRepo.save(slot);
+
+        bookings.push(newBooking);
+      }
     }
 
-    // Create the booking
-    const newBooking = bookingRepo.create({
-      user,
-      slot,
-      eventName,
-    });
+    if (bookings.length === 0) {
+      return res.status(400).json({ error: "No valid bookings could be created" });
+    }
 
-    // Save the booking and update the slot status
-    await bookingRepo.save(newBooking);
-    slot.status = "pending";
-    await slotRepo.save(slot);
-
-    res.status(201).json({ message: "Booking created successfully", booking: newBooking });
+    res.status(201).json({ message: "Bookings created successfully", bookings });
   } catch (error) {
-    console.error("Error creating booking:", error);
+    console.error("Error creating bookings:", error);
     res.status(500).json({ error: "An internal server error occurred" });
   }
 };
+
+// export const createBooking = async (req: Request, res: Response) => {
+//   try {
+//     const userId = res.locals.userId;
+
+//     if (!userId) {
+//       return res.status(401).json({ error: "Unauthorized: User not authenticated" });
+//     }
+//     const { dates, slotTimes, eventName ,venueName,participants} = req.body;
+    
+//     // Find the user
+//     const user = await userRepo.findOne({ where: { userId } });
+//     if (!user) {
+//       return res.status(404).json({ error: "User not found" });
+//     }
+
+//     // Find the venue
+//     const venue = await venueRepo.findOne({ where: { venueName } });
+//     if (!venue) {
+//       return res.status(404).json({ error: "Venue not found" });
+//     }
+
+//     if (venue.capacity < participants){
+//       return res.status(404).json({ error: "Participants over the capacity of venue" });
+//     }
+    
+//     // Validate input
+//     if (!Array.isArray(dates) || !Array.isArray(slotTimes) || dates.length !== slotTimes.length) {
+//       return res.status(400).json({ error:"Dates and slotTimes must be arrays of the same length" });
+//     }
+
+//     if (!eventName || typeof eventName !== "string") {
+//       return res.status(400).json({ error: "A valid eventName is required" });
+//     }
+
+//     // Validate dates are in the future
+//     const currentDate = new Date();
+//     const futureDates = dates.map((date, index) => ({
+//       date: dates[index],
+//       slotTime: slotTimes[index],
+//     })).filter(({ date }) => new Date(date) > currentDate);
+
+//     if (!futureDates.length) {
+//       return res.status(400).json({ error: "All dates must be in the future" });
+//     }
+
+//     const bookings = [];
+
+//     for (const { date, slotTime } of futureDates) {
+//     // Check if a slot already exists for the given date, time, and venue
+//       let slot = await slotRepo.findOne({ where: { date, slotTime, venue } });
+
+//       if (slot) {
+//         // If slot exists, check if it's available
+//         if (slot.status !== "available") {
+//           return res.status(404).json({ error: "Slot not available for ${date}, time: ${slotTime}" });
+//         }
+//       } else {
+//         // If slot does not exist, create a new one
+//         slot = slotRepo.create({
+//           date,
+//           slotTime,
+//           venue,
+//           status: "available",
+//         });
+//         await slotRepo.save(slot);
+//       }
+
+//       // Create the booking
+//       const newBooking = bookingRepo.create({
+//         user,
+//         slot,
+//         eventName,
+//       });
+
+
+//       // Save the booking and mark the slot as booked
+//       await bookingRepo.save(newBooking);
+//       slot.status = "pending";
+//       await slotRepo.save(slot);
+
+//       bookings.push(newBooking);
+//     }
+    
+//     res.status(201).json({ message: "Booking created successfully", booking: bookings });
+//   } catch (error) {
+//     console.error("Error creating booking:", error);
+//     res.status(500).json({ error: "An internal server error occurred" });
+//   }
+// };
 
 export const getMyBookings = async (req: Request, res: Response) => {
   try {
