@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import TimeSlotSelection from "./TimeSlotSelection";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import axios from "axios"; // Make sure Axios is imported
+import axios from "axios";
 import { format } from "date-fns";
 
 const EventBooking = () => {
@@ -21,6 +21,7 @@ const EventBooking = () => {
   });
 
   const [selectedDate, setSelectedDate] = useState(null);
+  const [currentDateSlots, setCurrentDateSlots] = useState([]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -36,11 +37,23 @@ const EventBooking = () => {
     // Format the date
     const formattedDate = format(date, "yyyy-MM-dd");
 
+    // Find the index of the current date in the existing dates
+    const dateIndex = eventDetails.date.indexOf(formattedDate);
+
+    // Reset current date slots
+    if (dateIndex !== -1) {
+      // If the date exists, get its slots
+      setCurrentDateSlots(eventDetails.slotTime[dateIndex] || []);
+    } else {
+      // If it's a new date, reset slots
+      setCurrentDateSlots([]);
+    }
+
     setEventDetails((prevDetails) => {
       // Check if the date is already selected
-      const dateIndex = prevDetails.date.indexOf(formattedDate);
+      const existingDateIndex = prevDetails.date.indexOf(formattedDate);
 
-      if (dateIndex === -1) {
+      if (existingDateIndex === -1) {
         // Date not in the array, add it
         return {
           ...prevDetails,
@@ -53,7 +66,7 @@ const EventBooking = () => {
           (d) => d !== formattedDate,
         );
         const updatedSlotTimes = prevDetails.slotTime.filter(
-          (_, index) => index !== dateIndex,
+          (_, index) => index !== existingDateIndex,
         );
 
         return {
@@ -87,16 +100,22 @@ const EventBooking = () => {
       const currentDateSlots = updatedSlotTime[dateIndex] || [];
       const isSelected = currentDateSlots.includes(startTime);
 
+      // Update current date slots state
+      let newCurrentDateSlots;
+
       // Update slots for the specific date
       if (isSelected) {
         // Remove the slot
-        updatedSlotTime[dateIndex] = currentDateSlots.filter(
-          (s) => s !== startTime,
-        );
+        newCurrentDateSlots = currentDateSlots.filter((s) => s !== startTime);
+        updatedSlotTime[dateIndex] = newCurrentDateSlots;
       } else {
         // Add the slot
-        updatedSlotTime[dateIndex] = [...currentDateSlots, startTime];
+        newCurrentDateSlots = [...currentDateSlots, startTime];
+        updatedSlotTime[dateIndex] = newCurrentDateSlots;
       }
+
+      // Update current date slots state
+      setCurrentDateSlots(newCurrentDateSlots);
 
       return {
         ...prevDetails,
@@ -126,6 +145,7 @@ const EventBooking = () => {
       alert("Please ensure each selected date has corresponding time slots.");
       return;
     }
+
     try {
       const response = await axios.post(
         "http://localhost:5000/api/event/booking",
@@ -143,6 +163,9 @@ const EventBooking = () => {
           venueName: "",
           participants: 0,
         });
+        setCurrentDateSlots([]);
+        setSelectedDate(null);
+
         console.log(eventDetails);
 
         alert("Event booked successfully!");
@@ -165,7 +188,7 @@ const EventBooking = () => {
 
       // Check if this date is in the selected dates
       if (eventDetails.date.includes(formattedDate)) {
-        return "bg-blue-200 text-blue-900 font-bold"; // Tailwind classes for highlighting
+        return "bg-blue-500 text-white font-bold italic"; // Tailwind classes for highlighting
       }
     }
     return null;
@@ -243,13 +266,13 @@ const EventBooking = () => {
           <div className="w-1/2">
             <TimeSlotSelection
               selectedDate={selectedDate}
-              selectedSlots={eventDetails.slotTime}
+              selectedSlots={currentDateSlots}
               onSlotSelect={handleSlotSelection}
             />
           </div>
         </div>
 
-        {/* Submit Button - Now part of the form and below the calendar/time slot section */}
+        {/* Submit Button */}
         <button
           type="submit"
           className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
