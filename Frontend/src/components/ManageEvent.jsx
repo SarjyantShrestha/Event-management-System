@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import moment from "moment";
 
 const ManageEvents = () => {
   const [bookings, setBookings] = useState([]);
@@ -45,7 +46,7 @@ const ManageEvents = () => {
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
-  // update status
+  // Update status
   const updateStatus = async (bookingId, status) => {
     try {
       const response = await fetch(
@@ -92,7 +93,7 @@ const ManageEvents = () => {
     }
   };
 
-  // delete booking
+  // Delete booking
   const deleteBooking = async (bookingId) => {
     try {
       const response = await fetch(
@@ -168,56 +169,60 @@ const ManageEvents = () => {
           <tbody className="text-gray-700">
             {noBookings ? (
               <tr>
-                <td 
-                  colSpan="6" 
+                <td
+                  colSpan="6"
                   className="text-center py-8 text-gray-500 text-xl"
                 >
                   No bookings found
                 </td>
               </tr>
             ) : filteredBookings.length > 0 ? (
-              filteredBookings.map((booking) => (
-                <tr
-                  key={booking.bookingId}
-                  className="hover:bg-gray-100 border-b"
-                >
-                  <td className="py-4 px-6 text-center">{booking.eventName}</td>
-                  <td className="py-4 px-6 text-center">
-                    {booking.slot.venue.venueName || "N/A"}
-                  </td>
-                  <td className="py-4 px-6 text-center">
-                    {booking.slot.date} - {booking.slot.slotTime}
-                  </td>
-                  <td className="py-4 px-6 text-center">
-                    {booking.slot.date} - {booking.slot.slotTime}
-                  </td>
-                  <td className="py-4 px-6 text-center">{booking.slot.status}</td>
-                  <td className="py-4 px-6 flex justify-center space-x-3">
-                    <button
-                      onClick={() => updateStatus(booking.bookingId, "approved")}
-                      className="text-green-500 hover:text-green-700"
-                    >
-                      Approve
-                    </button>
-                    <button
-                      onClick={() => updateStatus(booking.bookingId, "denied")}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      Deny
-                    </button>
-                    <button
-                      onClick={() => deleteBooking(booking.bookingId)}
-                      className="text-gray-500 hover:text-gray-700"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))
+              filteredBookings.map((booking) => {
+                const slotTime = booking.slot.slotTime;
+                const startTime = moment(slotTime, "hh:mm a");
+                const endTime = startTime.clone().add(45, "minutes");
+                const formattedEndTime = endTime.format("hh:mm a");
+
+                return (
+                  <tr key={booking.bookingId} className="hover:bg-gray-100 border-b">
+                    <td className="py-4 px-6 text-center">{booking.eventName}</td>
+                    <td className="py-4 px-6 text-center">
+                      {booking.slot.venue.venueName || "N/A"}
+                    </td>
+                    <td className="py-4 px-6 text-center">
+                      {booking.slot.date} - {booking.slot.slotTime}
+                    </td>
+                    <td className="py-4 px-6 text-center">
+                      {booking.slot.date} - {formattedEndTime}
+                    </td>
+                    <td className="py-4 px-6 text-center">{booking.slot.status}</td>
+                    <td className="py-4 px-6 flex justify-center space-x-3">
+                      <button
+                        onClick={() => updateStatus(booking.bookingId, "approved")}
+                        className="text-green-500 hover:text-green-700"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        onClick={() => updateStatus(booking.bookingId, "denied")}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        Deny
+                      </button>
+                      <button
+                        onClick={() => deleteBooking(booking.bookingId)}
+                        className="text-gray-500 hover:text-gray-700"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
             ) : (
               <tr>
-                <td 
-                  colSpan="6" 
+                <td
+                  colSpan="6"
                   className="text-center py-8 text-gray-500 text-xl"
                 >
                   No bookings match the current filter

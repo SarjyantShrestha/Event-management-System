@@ -201,6 +201,33 @@ export const getAllBookings = async (req: Request, res: Response) => {
 };
 
 
+// get by status
+
+export const getApprovedBookings = async (req: Request, res: Response) => {
+  try {
+    // Fetch only the approved bookings with relations to Slot, User, and Venue
+    const bookings = await bookingRepo.find({
+      where: {
+        slot: {
+          status: "booked",  // Filter for approved bookings
+        },
+      },
+      relations: ["slot", "slot.venue", "user"],
+    });
+
+    if (!bookings.length) {
+      return res.status(404).json({ message: "No approved bookings found" });
+    }
+
+    res.status(200).json(bookings);
+  } catch (error) {
+    console.error("Error fetching approved bookings:", error);
+    res.status(500).json({ error: "An internal server error occurred" });
+  }
+};
+
+
+
 export const getSlotsByDate = async (req: Request, res: Response) => {
   try {
     const { date } = req.query;
