@@ -12,5 +12,5 @@ router.get('/my-bookings', authenticateToken, getMyBookings);
 router.get("/allbookings", authenticateToken, verifyRole('admin'), getAllBookings);
 router.get("/slots-by-date", getSlotsByDate);
 router.get("/slots-by-date_venue", getSlotsByVenueNameAndDate);
-router.get("/approvebooking",authenticateToken,verifyRole('admin'),updateBookingStatus);
+router.put("/approvebooking",authenticateToken,verifyRole('admin'),updateBookingStatus);
 export default router;
