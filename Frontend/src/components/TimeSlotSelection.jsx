@@ -18,10 +18,12 @@ const TimeSlotSelection = ({ selectedDate, selectedSlots, onSlotSelect }) => {
     <>
       <h3 className="text-xl font-semibold">
         <div className="text-center">
-          <p className="text-lg mb-4">
-            {selectedDate
-              ? format(selectedDate, "eeee, MMMM d")
-              : "Select a date"}
+          <p className="text-lg mb-4 text-blue-500">
+            {selectedDate ? (
+              format(selectedDate, "eeee, MMMM d")
+            ) : (
+              <span className="text-red-600">!! Select a date !!</span>
+            )}
           </p>
         </div>
       </h3>
@@ -31,10 +33,10 @@ const TimeSlotSelection = ({ selectedDate, selectedSlots, onSlotSelect }) => {
             <button
               key={index}
               onClick={() => onSlotSelect(slot)}
-              className={`w-full text-center p-3 rounded-lg ${
-                selectedSlots.includes(slot)
+              className={`w-full text-center p-3 rounded-lg transition-colors duration-200 ${
+                selectedSlots.includes(slot.split(" - ")[0])
                   ? "bg-blue-500 text-white"
-                  : "bg-gray-200 hover:bg-blue-500 hover:text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-blue-100"
               }`}
             >
               {slot}
