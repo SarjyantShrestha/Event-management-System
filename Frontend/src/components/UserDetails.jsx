@@ -14,6 +14,7 @@ const UserTable = ({ onUserSelect }) => {
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
         });
+        console.log(localStorage.getItem("authToken"));
 
         if (response.status !== 200) {
           throw new Error("Failed to fetch users.");

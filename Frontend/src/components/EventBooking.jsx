@@ -2,29 +2,27 @@ import React, { useState } from "react";
 import TimeSlotSelection from "./TimeSlotSelection";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
+import axios from "axios";
+import { format } from "date-fns";
 
 const EventBooking = () => {
   const venues = [
-    { id: 1, name: "Conference Room A" },
-    { id: 2, name: "Banquet Hall" },
-    { id: 3, name: "Outdoor Garden" },
+    { id: 1, name: "Hall 1" },
+    { id: 2, name: "Hall 2" },
+    { id: 3, name: "Hall 3" },
   ];
 
-  // State to manage form fields
   const [eventDetails, setEventDetails] = useState({
     eventName: "",
-    slot: "",
-    startDate: "",
-    endDate: "",
-    startTime: "",
-    endTime: "",
-    participants: 1,
+    date: [],
+    slotTime: [], // Store selected slots here
+    venueName: "",
+    participants: 0,
   });
 
-  // State to track the selected date
   const [selectedDate, setSelectedDate] = useState(null);
+  const [currentDateSlots, setCurrentDateSlots] = useState([]);
 
-  // Handle form field changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setEventDetails({
@@ -33,43 +31,167 @@ const EventBooking = () => {
     });
   };
 
-  // Handle date change from the calendar
   const handleDateChange = (date) => {
     setSelectedDate(date);
-    setEventDetails({
-      ...eventDetails,
-      startDate: format(date, "yyyy-MM-dd"), // Storing date in the required format
+
+    // Format the date
+    const formattedDate = format(date, "yyyy-MM-dd");
+
+    // Find the index of the current date in the existing dates
+    const dateIndex = eventDetails.date.indexOf(formattedDate);
+
+    // Reset current date slots
+    if (dateIndex !== -1) {
+      // If the date exists, get its slots
+      setCurrentDateSlots(eventDetails.slotTime[dateIndex] || []);
+    } else {
+      // If it's a new date, reset slots
+      setCurrentDateSlots([]);
+    }
+
+    setEventDetails((prevDetails) => {
+      // Check if the date is already selected
+      const existingDateIndex = prevDetails.date.indexOf(formattedDate);
+
+      if (existingDateIndex === -1) {
+        // Date not in the array, add it
+        return {
+          ...prevDetails,
+          date: [...prevDetails.date, formattedDate],
+          slotTime: [...prevDetails.slotTime, []], // Add empty slot array for this date
+        };
+      } else {
+        // Date already in the array, remove it
+        const updatedDates = prevDetails.date.filter(
+          (d) => d !== formattedDate,
+        );
+        const updatedSlotTimes = prevDetails.slotTime.filter(
+          (_, index) => index !== existingDateIndex,
+        );
+
+        return {
+          ...prevDetails,
+          date: updatedDates,
+          slotTime: updatedSlotTimes,
+        };
+      }
+    });
+  };
+
+  const handleSlotSelection = (slot) => {
+    const startTime = slot.split(" - ")[0];
+
+    setEventDetails((prevDetails) => {
+      // If no date selected, do nothing
+      if (!selectedDate) return prevDetails;
+
+      const formattedDate = format(selectedDate, "yyyy-MM-dd");
+
+      // Find the index of the current date
+      const dateIndex = prevDetails.date.indexOf(formattedDate);
+
+      // Create a copy of the current slotTime array
+      const updatedSlotTime = [...prevDetails.slotTime];
+
+      // If the date doesn't have any slots yet, add an empty array
+      if (dateIndex === -1) return prevDetails;
+
+      // Check if the slot is already selected for this date
+      const currentDateSlots = updatedSlotTime[dateIndex] || [];
+      const isSelected = currentDateSlots.includes(startTime);
+
+      // Update current date slots state
+      let newCurrentDateSlots;
+
+      // Update slots for the specific date
+      if (isSelected) {
+        // Remove the slot
+        newCurrentDateSlots = currentDateSlots.filter((s) => s !== startTime);
+        updatedSlotTime[dateIndex] = newCurrentDateSlots;
+      } else {
+        // Add the slot
+        newCurrentDateSlots = [...currentDateSlots, startTime];
+        updatedSlotTime[dateIndex] = newCurrentDateSlots;
+      }
+
+      // Update current date slots state
+      setCurrentDateSlots(newCurrentDateSlots);
+
+      return {
+        ...prevDetails,
+        slotTime: updatedSlotTime,
+      };
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Check if any selected dates have no time slots
+    const emptySlotDates = eventDetails.date.filter(
+      (date, index) => eventDetails.slotTime[index]?.length === 0,
+    );
+
+    if (emptySlotDates.length > 0) {
+      // Create a readable list of dates without slots
+      const datesList = emptySlotDates.join(", ");
+      alert(`Please select time slots for the following date(s): ${datesList}`);
+      return;
+    }
+
+    // Validate that dates and slots match
+    const isValid = eventDetails.date.length === eventDetails.slotTime.length;
+    if (!isValid) {
+      alert("Please ensure each selected date has corresponding time slots.");
+      return;
+    }
+
     try {
-      const response = await fetch("http://localhost:5000/api/book-event", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(eventDetails),
-      });
-      const data = await response.json();
-      if (response.ok) {
-        // Reset the form after successful submission
+      const response = await axios.post(
+        "http://localhost:5000/api/event/booking",
+        eventDetails,
+        {
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+
+      if (response.status === 200 || response.status === 201) {
         setEventDetails({
           eventName: "",
-          venue: "",
-          startDate: "",
-          endDate: "",
-          startTime: "",
-          endTime: "",
-          participants: 1,
+          date: [],
+          slotTime: [],
+          venueName: "",
+          participants: 0,
         });
+        setCurrentDateSlots([]);
+        setSelectedDate(null);
+
+        console.log(eventDetails);
 
         alert("Event booked successfully!");
       } else {
-        alert(data.message || "Booking failed.");
+        alert(response.data.error || "Booking failed.");
       }
     } catch (error) {
       console.error("Error booking event:", error);
+      alert(
+        error.response?.data?.error || "An error occurred. Please try again.",
+      );
     }
+  };
+
+  const tileClassName = ({ date, view }) => {
+    // Only add class to dates in month view
+    if (view === "month") {
+      // Convert date to ISO string format for comparison
+      const formattedDate = format(date, "yyyy-MM-dd");
+
+      // Check if this date is in the selected dates
+      if (eventDetails.date.includes(formattedDate)) {
+        return "bg-blue-500 text-white font-bold italic"; // Tailwind classes for highlighting
+      }
+    }
+    return null;
   };
 
   return (
@@ -117,8 +239,8 @@ const EventBooking = () => {
           </label>
           <select
             id="venue"
-            name="venue"
-            value={eventDetails.venue}
+            name="venueName"
+            value={eventDetails.venueName}
             onChange={handleInputChange}
             className="w-full p-2 border rounded"
             required
@@ -132,16 +254,23 @@ const EventBooking = () => {
           </select>
         </div>
 
+        {/* Calendar and Time Slot Selection */}
         <div className="flex h-80 space-x-8">
           <div className="w-1/2 flex mb-auto justify-center">
-            <Calendar onChange={handleDateChange} value={selectedDate} />
+            <Calendar
+              onChange={handleDateChange}
+              value={selectedDate}
+              tileClassName={tileClassName}
+            />
           </div>
           <div className="w-1/2">
-            <TimeSlotSelection selectedDate={selectedDate} />
+            <TimeSlotSelection
+              selectedDate={selectedDate}
+              selectedSlots={currentDateSlots}
+              onSlotSelect={handleSlotSelection}
+            />
           </div>
         </div>
-
-        {/* Display the selected date */}
 
         {/* Submit Button */}
         <button
