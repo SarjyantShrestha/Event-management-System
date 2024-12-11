@@ -2,29 +2,26 @@ import React, { useState } from "react";
 import TimeSlotSelection from "./TimeSlotSelection";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
+import axios from "axios"; // Make sure Axios is imported
+import { format } from "date-fns";
 
 const EventBooking = () => {
   const venues = [
-    { id: 1, name: "Conference Room A" },
-    { id: 2, name: "Banquet Hall" },
-    { id: 3, name: "Outdoor Garden" },
+    { id: 1, name: "Hall 1" },
+    { id: 2, name: "Hall 2" },
+    { id: 3, name: "Hall 3" },
   ];
 
-  // State to manage form fields
   const [eventDetails, setEventDetails] = useState({
     eventName: "",
-    slot: "",
-    startDate: "",
-    endDate: "",
-    startTime: "",
-    endTime: "",
-    participants: 1,
+    date: [],
+    slotTime: [], // Store selected slots here
+    venueName: "",
+    participants: 0,
   });
 
-  // State to track the selected date
   const [selectedDate, setSelectedDate] = useState(null);
 
-  // Handle form field changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setEventDetails({
@@ -33,42 +30,59 @@ const EventBooking = () => {
     });
   };
 
-  // Handle date change from the calendar
   const handleDateChange = (date) => {
     setSelectedDate(date);
     setEventDetails({
       ...eventDetails,
-      startDate: format(date, "yyyy-MM-dd"), // Storing date in the required format
+      date: format(date, "yyyy-MM-dd"), // Update the date field
+    });
+  };
+
+  // Handle time slot selection
+  const handleSlotSelection = (slot) => {
+    const startTime = slot.split(" - ")[0]; // Extract the starting time
+    setEventDetails((prevDetails) => {
+      const isSelected = prevDetails.slotTime.includes(startTime);
+      const updatedSlots = isSelected
+        ? prevDetails.slotTime.filter((s) => s !== startTime) // Remove if already selected
+        : [...prevDetails.slotTime, startTime]; // Add if not selected
+      return {
+        ...prevDetails,
+        slotTime: updatedSlots,
+      };
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:5000/api/book-event", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(eventDetails),
-      });
-      const data = await response.json();
-      if (response.ok) {
-        // Reset the form after successful submission
+      const response = await axios.post(
+        "http://localhost:5000/api/event/booking",
+        eventDetails,
+        {
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+
+      if (response.status === 200 || response.status === 201) {
         setEventDetails({
           eventName: "",
-          venue: "",
-          startDate: "",
-          endDate: "",
-          startTime: "",
-          endTime: "",
-          participants: 1,
+          date: [],
+          slotTime: [],
+          venueName: "",
+          participants: 0,
         });
+        console.log(eventDetails);
 
         alert("Event booked successfully!");
       } else {
-        alert(data.message || "Booking failed.");
+        alert(response.data.error || "Booking failed.");
       }
     } catch (error) {
       console.error("Error booking event:", error);
+      alert(
+        error.response?.data?.error || "An error occurred. Please try again.",
+      );
     }
   };
 
@@ -117,8 +131,8 @@ const EventBooking = () => {
           </label>
           <select
             id="venue"
-            name="venue"
-            value={eventDetails.venue}
+            name="venueName"
+            value={eventDetails.venueName}
             onChange={handleInputChange}
             className="w-full p-2 border rounded"
             required
@@ -131,19 +145,6 @@ const EventBooking = () => {
             ))}
           </select>
         </div>
-
-        <div className="flex h-80 space-x-8">
-          <div className="w-1/2 flex mb-auto justify-center">
-            <Calendar onChange={handleDateChange} value={selectedDate} />
-          </div>
-          <div className="w-1/2">
-            <TimeSlotSelection selectedDate={selectedDate} />
-          </div>
-        </div>
-
-        {/* Display the selected date */}
-
-        {/* Submit Button */}
         <button
           type="submit"
           className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -151,6 +152,22 @@ const EventBooking = () => {
           Book Event
         </button>
       </form>
+
+      {/* Calendar and Time Slot Selection */}
+      <div className="flex h-80 space-x-8">
+        <div className="w-1/2 flex mb-auto justify-center">
+          <Calendar onChange={handleDateChange} value={selectedDate} />
+        </div>
+        <div className="w-1/2">
+          <TimeSlotSelection
+            selectedDate={selectedDate}
+            selectedSlots={eventDetails.slotTime}
+            onSlotSelect={handleSlotSelection}
+          />
+        </div>
+      </div>
+
+      {/* Submit Button */}
     </div>
   );
 };

@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { format } from "date-fns"; // Importing date-fns for date formatting
+import React from "react";
+import { format } from "date-fns";
 
 const timeSlots = [
   "10:15am - 11:00am",
@@ -13,21 +13,16 @@ const timeSlots = [
   "4:15pm - 5:00pm",
 ];
 
-const TimeSlotSelection = ({ selectedDate }) => {
-  const [displayDate, setDisplayDate] = useState(new Date()); // Default to today's date
-
-  // Update the displayed date whenever selectedDate changes
-  useEffect(() => {
-    if (selectedDate) {
-      setDisplayDate(selectedDate);
-    }
-  }, [selectedDate]);
-
+const TimeSlotSelection = ({ selectedDate, selectedSlots, onSlotSelect }) => {
   return (
     <>
       <h3 className="text-xl font-semibold">
         <div className="text-center">
-          <p className="text-lg mb-4">{format(displayDate, "eeee, MMMM d")}</p>
+          <p className="text-lg mb-4">
+            {selectedDate
+              ? format(selectedDate, "eeee, MMMM d")
+              : "Select a date"}
+          </p>
         </div>
       </h3>
       <div className="h-[80%] overflow-auto">
@@ -35,7 +30,12 @@ const TimeSlotSelection = ({ selectedDate }) => {
           {timeSlots.map((slot, index) => (
             <button
               key={index}
-              className="w-full text-center p-3 bg-gray-200 hover:bg-blue-500 hover:text-white rounded-lg"
+              onClick={() => onSlotSelect(slot)}
+              className={`w-full text-center p-3 rounded-lg ${
+                selectedSlots.includes(slot)
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 hover:bg-blue-500 hover:text-white"
+              }`}
             >
               {slot}
             </button>
