@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import TimeSlotSelection from "./TimeSlotSelection";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
@@ -6,11 +6,20 @@ import axios from "axios";
 import { format } from "date-fns";
 
 const EventBooking = () => {
-  const venues = [
-    { id: 1, name: "Hall 1" },
-    { id: 2, name: "Hall 2" },
-    { id: 3, name: "Hall 3" },
-  ];
+  const [venues, setVenues] = useState([]);
+
+  useEffect(() => {
+    const fetchVenues = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/venues");
+        setVenues(response.data);
+      } catch (error) {
+        console.error("Error fetching venues:", error);
+      }
+    };
+
+    fetchVenues();
+  }, []);
 
   const [eventDetails, setEventDetails] = useState({
     eventName: "",
@@ -166,8 +175,6 @@ const EventBooking = () => {
         setCurrentDateSlots([]);
         setSelectedDate(null);
 
-        console.log(eventDetails);
-
         alert("Event booked successfully!");
       } else {
         alert(response.data.error || "Booking failed.");
@@ -247,8 +254,8 @@ const EventBooking = () => {
           >
             <option value="">Select a Venue</option>
             {venues.map((venue) => (
-              <option key={venue.id} value={venue.name}>
-                {venue.name}
+              <option key={venue.venueId} value={venue.venueName}>
+                {venue.venueName}
               </option>
             ))}
           </select>
