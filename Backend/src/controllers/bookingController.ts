@@ -83,6 +83,7 @@ export const createBooking = async (req: Request, res: Response) => {
             date: date[i],
             slotTime: slotTime[i][j],
             status: "available",
+            venue:venue
           });
           await slotRepo.save(slot);
         }
@@ -113,96 +114,6 @@ export const createBooking = async (req: Request, res: Response) => {
     res.status(500).json({ error: "An internal server error occurred" });
   }
 };
-
-// export const createBooking = async (req: Request, res: Response) => {
-//   try {
-//     const userId = res.locals.userId;
-
-//     if (!userId) {
-//       return res.status(401).json({ error: "Unauthorized: User not authenticated" });
-//     }
-//     const { dates, slotTimes, eventName ,venueName,participants} = req.body;
-    
-//     // Find the user
-//     const user = await userRepo.findOne({ where: { userId } });
-//     if (!user) {
-//       return res.status(404).json({ error: "User not found" });
-//     }
-
-//     // Find the venue
-//     const venue = await venueRepo.findOne({ where: { venueName } });
-//     if (!venue) {
-//       return res.status(404).json({ error: "Venue not found" });
-//     }
-
-//     if (venue.capacity < participants){
-//       return res.status(404).json({ error: "Participants over the capacity of venue" });
-//     }
-    
-//     // Validate input
-//     if (!Array.isArray(dates) || !Array.isArray(slotTimes) || dates.length !== slotTimes.length) {
-//       return res.status(400).json({ error:"Dates and slotTimes must be arrays of the same length" });
-//     }
-
-//     if (!eventName || typeof eventName !== "string") {
-//       return res.status(400).json({ error: "A valid eventName is required" });
-//     }
-
-//     // Validate dates are in the future
-//     const currentDate = new Date();
-//     const futureDates = dates.map((date, index) => ({
-//       date: dates[index],
-//       slotTime: slotTimes[index],
-//     })).filter(({ date }) => new Date(date) > currentDate);
-
-//     if (!futureDates.length) {
-//       return res.status(400).json({ error: "All dates must be in the future" });
-//     }
-
-//     const bookings = [];
-
-//     for (const { date, slotTime } of futureDates) {
-//     // Check if a slot already exists for the given date, time, and venue
-//       let slot = await slotRepo.findOne({ where: { date, slotTime, venue } });
-
-//       if (slot) {
-//         // If slot exists, check if it's available
-//         if (slot.status !== "available") {
-//           return res.status(404).json({ error: "Slot not available for ${date}, time: ${slotTime}" });
-//         }
-//       } else {
-//         // If slot does not exist, create a new one
-//         slot = slotRepo.create({
-//           date,
-//           slotTime,
-//           venue,
-//           status: "available",
-//         });
-//         await slotRepo.save(slot);
-//       }
-
-//       // Create the booking
-//       const newBooking = bookingRepo.create({
-//         user,
-//         slot,
-//         eventName,
-//       });
-
-
-//       // Save the booking and mark the slot as booked
-//       await bookingRepo.save(newBooking);
-//       slot.status = "pending";
-//       await slotRepo.save(slot);
-
-//       bookings.push(newBooking);
-//     }
-    
-//     res.status(201).json({ message: "Booking created successfully", booking: bookings });
-//   } catch (error) {
-//     console.error("Error creating booking:", error);
-//     res.status(500).json({ error: "An internal server error occurred" });
-//   }
-// };
 
 export const getMyBookings = async (req: Request, res: Response) => {
   try {
@@ -347,6 +258,41 @@ export const getSlotsByVenueNameAndDate = async (req: Request, res: Response) =>
     res.status(200).json(slots);
   } catch (error) {
     console.error("Error fetching slots by venue name and date:", error);
+    res.status(500).json({ error: "An internal server error occurred" });
+  }
+};
+
+
+
+export const updateBookingStatus = async (req: Request, res: Response) => {
+  try {
+    const { bookingId, status } = req.body;
+
+    if (!bookingId || !status) {
+      return res.status(400).json({ error: "Booking ID and status are required" });
+    }
+
+    const booking = await bookingRepo.findOne({
+      where: { bookingId },
+      relations: ["slot"],
+    });
+
+    if (!booking) {
+      return res.status(404).json({ error: "Booking not found" });
+    }
+
+    if (status !== "approved" && status !== "denied") {
+      return res.status(400).json({ error: "Invalid status. Use 'approved' or 'denied'" });
+    }
+
+    booking.slot.status = status === "approved" ? "booked" : "available";
+    await slotRepo.save(booking.slot);
+
+    await bookingRepo.save({ ...booking, status });
+
+    res.status(200).json({ message: `Booking status updated to '${status}'`, booking });
+  } catch (error) {
+    console.error("Error updating booking status:", error);
     res.status(500).json({ error: "An internal server error occurred" });
   }
 };
