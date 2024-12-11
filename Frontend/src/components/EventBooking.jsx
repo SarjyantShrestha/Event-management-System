@@ -41,10 +41,14 @@ const EventBooking = () => {
   };
 
   const handleDateChange = (date) => {
-    setSelectedDate(date);
-
     // Format the date
     const formattedDate = format(date, "yyyy-MM-dd");
+    setSelectedDate(formattedDate);
+
+    // Fetch slots if a venue is selected
+    if (eventDetails.venueName) {
+      fetchDate(eventDetails.venueName, formattedDate);
+    }
 
     // Find the index of the current date in the existing dates
     const dateIndex = eventDetails.date.indexOf(formattedDate);
@@ -133,12 +137,38 @@ const EventBooking = () => {
     });
   };
 
+  const fetchDate = async (venueName, date) => {
+    if (!venueName || !date) return;
+
+    try {
+      console.log(date);
+      const response = await axios.get(
+        `http://localhost:5000/api/event/slots-by-date_venue`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+          params: {
+            venueName,
+            date,
+          },
+        },
+      );
+
+      console.log("Response data:", response.data); // Debugging response
+      return response.data; // Return the fetched data if needed
+    } catch (error) {
+      console.error("Error fetching date:", error);
+      throw error; // Handle error appropriately
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Check if any selected dates have no time slots
     const emptySlotDates = eventDetails.date.filter(
-      (date, index) => eventDetails.slotTime[index]?.length === 0,
+      (_, index) => eventDetails.slotTime[index]?.length === 0,
     );
 
     if (emptySlotDates.length > 0) {
