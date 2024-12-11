@@ -13,8 +13,8 @@ export class Slot {
   @Column({ type: "date" })
   date: string;
 
-  @Column({ type: "varchar", length: 10, enum: ["available", "booked", "cancelled"] })
-  status: "available" | "booked" | "cancelled";
+  @Column({ type: "varchar", length: 10, enum: ["available", "booked", "pending"] })
+  status: "available" | "booked" | "pending";
 
   @Column({ type: "varchar", length: 15 })
   slotTime: string;

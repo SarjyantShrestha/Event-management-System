@@ -1,3 +1,6 @@
+import { useState, useEffect } from "react";
+import { format } from "date-fns"; // Importing date-fns for date formatting
+
 const timeSlots = [
   "10:15am - 11:00am",
   "11:00am - 11:45am",
@@ -10,16 +13,29 @@ const timeSlots = [
   "4:15pm - 5:00pm",
 ];
 
-const TimeSlotSelection = () => {
+const TimeSlotSelection = ({ selectedDate }) => {
+  const [displayDate, setDisplayDate] = useState(new Date()); // Default to today's date
+
+  // Update the displayed date whenever selectedDate changes
+  useEffect(() => {
+    if (selectedDate) {
+      setDisplayDate(selectedDate);
+    }
+  }, [selectedDate]);
+
   return (
     <>
-      <h3 className="text-xl font-semibold">Thursday, October 5</h3>
-      <div className="mt-6 h-[50%] overflow-auto">
-        <div className="space-y-2 mt-4">
+      <h3 className="text-xl font-semibold">
+        <div className="text-center">
+          <p className="text-lg mb-4">{format(displayDate, "eeee, MMMM d")}</p>
+        </div>
+      </h3>
+      <div className="h-[80%] overflow-auto">
+        <div className="space-y-2 px-10">
           {timeSlots.map((slot, index) => (
             <button
               key={index}
-              className="w-full p-3 text-left bg-gray-200 hover:bg-blue-500 hover:text-white rounded-lg"
+              className="w-full text-center p-3 bg-gray-200 hover:bg-blue-500 hover:text-white rounded-lg"
             >
               {slot}
             </button>

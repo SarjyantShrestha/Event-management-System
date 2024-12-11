@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import EventBookingCalendar from "./EventBC";
 import TimeSlotSelection from "./TimeSlotSelection";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
 
 const EventBooking = () => {
   const venues = [
@@ -12,7 +13,7 @@ const EventBooking = () => {
   // State to manage form fields
   const [eventDetails, setEventDetails] = useState({
     eventName: "",
-    venue: "",
+    slot: "",
     startDate: "",
     endDate: "",
     startTime: "",
@@ -20,12 +21,24 @@ const EventBooking = () => {
     participants: 1,
   });
 
+  // State to track the selected date
+  const [selectedDate, setSelectedDate] = useState(null);
+
   // Handle form field changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setEventDetails({
       ...eventDetails,
       [name]: value,
+    });
+  };
+
+  // Handle date change from the calendar
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+    setEventDetails({
+      ...eventDetails,
+      startDate: format(date, "yyyy-MM-dd"), // Storing date in the required format
     });
   };
 
@@ -62,7 +75,7 @@ const EventBooking = () => {
   return (
     <div className="event-booking-container max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
       <h1 className="text-2xl font-bold mb-6 text-center">Event Booking</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* Event Name */}
         <div className="form-group">
           <label htmlFor="eventName" className="block text-gray-700">
@@ -75,6 +88,24 @@ const EventBooking = () => {
             value={eventDetails.eventName}
             onChange={handleInputChange}
             className="w-full p-2 border rounded"
+            required
+          />
+        </div>
+
+        {/* Number of Participants */}
+        <div className="form-group">
+          <label htmlFor="participants" className="block text-gray-700">
+            Number of Participants
+          </label>
+          <input
+            type="number"
+            id="participants"
+            name="participants"
+            value={eventDetails.participants}
+            onChange={handleInputChange}
+            className="w-full p-2 border rounded"
+            min="1"
+            max="100"
             required
           />
         </div>
@@ -101,49 +132,16 @@ const EventBooking = () => {
           </select>
         </div>
 
-        {/* Start Date and Time
-        <div className="flex gap-4">
-          <div className="form-group w-1/2">
-            <label htmlFor="startDate" className="block text-gray-700 w-1/2">
-              Date
-            </label>
-            <input
-              type="date"
-              id="startDate"
-              name="startDate"
-              value={eventDetails.startDate}
-              onChange={handleInputChange}
-              className="w-full p-2 border rounded"
-              required
-            />
-          </div>
-        </div>
- */}
-        <div className="flex space-x-8">
-          <div className="w-1/2">
-            <EventBookingCalendar />
+        <div className="flex h-80 space-x-8">
+          <div className="w-1/2 flex mb-auto justify-center">
+            <Calendar onChange={handleDateChange} value={selectedDate} />
           </div>
           <div className="w-1/2">
-            <TimeSlotSelection />
+            <TimeSlotSelection selectedDate={selectedDate} />
           </div>
         </div>
-        {/* Number of Participants */}
-        <div className="form-group">
-          <label htmlFor="participants" className="block text-gray-700">
-            Number of Participants
-          </label>
-          <input
-            type="number"
-            id="participants"
-            name="participants"
-            value={eventDetails.participants}
-            onChange={handleInputChange}
-            className="w-full p-2 border rounded"
-            min="1"
-            max="100"
-            required
-          />
-        </div>
+
+        {/* Display the selected date */}
 
         {/* Submit Button */}
         <button

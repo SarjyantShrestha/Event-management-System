@@ -7,8 +7,7 @@ import { AppDataSource } from './initializers/data-source'
 import AuthRouter from './routes/authRoutes'
 import UserRouter from './routes/userRoutes'
 import VenueRouter from './routes/venueRoutes'
-// import BookingRouter from './routes/bookingRoutes.bak'
-
+import BookingRouter from './routes/bookingRoutes'
 
 
 // setting up server
@@ -23,7 +22,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use('/api/auth', AuthRouter)
 app.use('/api/users', UserRouter)
 app.use('/api/venues', VenueRouter)
-// app.use('/api/bookings', BookingRouter)
+app.use('/api/event', BookingRouter)
 
 // initiatlizing db & starting server
 AppDataSource.initialize()
