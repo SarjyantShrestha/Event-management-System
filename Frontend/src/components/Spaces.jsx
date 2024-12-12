@@ -137,9 +137,7 @@ const ManageSpaces = () => {
   return (
     <>
       {modal !== null && <Amenities modal={modal} onClose={onClose} />}
-      <div className="max-w-6xl mx-auto p-8 bg-gray-100 rounded-lg shadow-lg">
-        <h1 className="text-3xl font-bold mb-6 text-center">Listed Venues</h1>
-
+      <div className="w-full mx-auto p-8 rounded-lg ">
         {/* Add Venue Button */}
         <div className="text-right mb-4">
           <button
@@ -155,10 +153,18 @@ const ManageSpaces = () => {
           <table className="table-auto w-full text-left">
             <thead className="bg-gray-200">
               <tr className="text-center">
-                <th className="px-6 py-3 font-semibold">Name</th>
-                <th className="px-6 py-3 font-semibold">Capacity</th>
-                <th className="px-6 py-3 font-semibold">Location</th>
-                <th className="px-6 py-3 font-semibold">Actions</th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                  Name
+                </th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                  Capacity
+                </th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                  Location
+                </th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="m-5">

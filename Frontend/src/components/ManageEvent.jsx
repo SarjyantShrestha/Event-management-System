@@ -18,7 +18,7 @@ const ManageEvents = () => {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("authToken")}`,
             },
-          }
+          },
         );
 
         if (!response.ok) {
@@ -61,7 +61,7 @@ const ManageEvents = () => {
             status: status,
             bookingId: bookingId,
           }),
-        }
+        },
       );
 
       if (response.ok) {
@@ -79,13 +79,13 @@ const ManageEvents = () => {
                     status: updatedBooking?.status || status,
                   },
                 }
-              : booking
-          )
+              : booking,
+          ),
         );
       } else {
         console.error(
           "Failed to update booking status, status code:",
-          response.status
+          response.status,
         );
       }
     } catch (error) {
@@ -103,12 +103,12 @@ const ManageEvents = () => {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
-        }
+        },
       );
 
       if (response.ok) {
         setBookings((prev) =>
-          prev.filter((booking) => booking.bookingId !== bookingId)
+          prev.filter((booking) => booking.bookingId !== bookingId),
         );
         console.log("Booking deleted successfully");
       } else {
@@ -125,14 +125,14 @@ const ManageEvents = () => {
       : bookings.filter((booking) => booking.slot.status === filter);
 
   return (
-    <div className="p-8 bg-gray-100">
+    <div className="p-8">
       <h1 className="text-3xl font-bold mb-6 text-center text-blue-600">
         Manage Events
       </h1>
 
       {/* Filter Buttons */}
       <div className="flex justify-center space-x-4 mb-6">
-        {["All", "pending", "approved", "denied"].map((status) => (
+        {["All", "pending", "approved", "available"].map((status) => (
           <button
             key={status}
             onClick={() => setFilter(status)}
@@ -184,8 +184,13 @@ const ManageEvents = () => {
                 const formattedEndTime = endTime.format("hh:mm a");
 
                 return (
-                  <tr key={booking.bookingId} className="hover:bg-gray-100 border-b">
-                    <td className="py-4 px-6 text-center">{booking.eventName}</td>
+                  <tr
+                    key={booking.bookingId}
+                    className="hover:bg-gray-100 border-b"
+                  >
+                    <td className="py-4 px-6 text-center">
+                      {booking.eventName}
+                    </td>
                     <td className="py-4 px-6 text-center">
                       {booking.slot.venue.venueName || "N/A"}
                     </td>
@@ -195,16 +200,35 @@ const ManageEvents = () => {
                     <td className="py-4 px-6 text-center">
                       {booking.slot.date} - {formattedEndTime}
                     </td>
-                    <td className="py-4 px-6 text-center">{booking.slot.status}</td>
+                    <td className="py-4 px-6 text-center">
+                      <span
+                        className={`inline-block py-1 px-3 rounded-full text-white 
+    ${
+      booking.slot.status === "booked"
+        ? "bg-green-400"
+        : booking.slot.status === "pending"
+          ? "bg-yellow-400"
+          : booking.slot.status === "denied"
+            ? "bg-red-500"
+            : "bg-gray-300"
+    }`}
+                      >
+                        {booking.slot.status}
+                      </span>
+                    </td>
                     <td className="py-4 px-6 flex justify-center space-x-3">
                       <button
-                        onClick={() => updateStatus(booking.bookingId, "approved")}
+                        onClick={() =>
+                          updateStatus(booking.bookingId, "approved")
+                        }
                         className="text-green-500 hover:text-green-700"
                       >
                         Approve
                       </button>
                       <button
-                        onClick={() => updateStatus(booking.bookingId, "denied")}
+                        onClick={() =>
+                          updateStatus(booking.bookingId, "denied")
+                        }
                         className="text-red-500 hover:text-red-700"
                       >
                         Deny

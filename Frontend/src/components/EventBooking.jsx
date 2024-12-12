@@ -244,7 +244,7 @@ const EventBooking = () => {
   };
 
   return (
-    <div className="event-booking-container max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
+    <div className="event-booking-container max-w-4xl mx-auto p-6 bg-white rounded-lg">
       <h1 className="text-2xl font-bold mb-6 text-center">Event Booking</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Event Name */}

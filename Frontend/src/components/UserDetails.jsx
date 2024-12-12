@@ -44,19 +44,16 @@ const UserTable = ({ onUserSelect }) => {
       <table className="min-w-full">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
               Name
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
               Email
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
               Role
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-              Status
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
               Actions
             </th>
           </tr>
@@ -65,11 +62,13 @@ const UserTable = ({ onUserSelect }) => {
           {users.map((user) => (
             <tr key={user.userId}>
               {/*<td className="px-6 py-4 whitespace-nowrap">{user.user_id}</td>*/}
-              <td className="px-6 py-4 whitespace-nowrap">
+              <td className="px-6 py-4 whitespace-nowrap text-center">
                 {user.firstName} {user.lastName}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap">{user.email}</td>
-              <td className="px-6 py-4 whitespace-nowrap">
+              <td className="px-6 py-4 whitespace-nowrap text-center">
+                {user.email}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-center">
                 <span
                   className={`inline-block w-14 text-center px-2 py-1 rounded text-sm ${
                     user.role === "admin"
@@ -80,18 +79,7 @@ const UserTable = ({ onUserSelect }) => {
                   {user.role}
                 </span>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <span
-                  className={`px-2 py-1 rounded text-sm ${
-                    user.status === "Active"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-red-100 text-red-800"
-                  }`}
-                >
-                  {user.status}
-                </span>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
+              <td className="px-6 py-4 whitespace-nowrap text-center">
                 <button
                   onClick={() => onUserSelect(user)}
                   className="px-2 py-1 rounded bg-gray-100 text-sm text-blue-500 hover:text-blue-700 mr-2"
