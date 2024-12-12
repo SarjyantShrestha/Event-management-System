@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import TimeSlotSelection from "./TimeSlotSelection";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
@@ -6,11 +6,20 @@ import axios from "axios";
 import { format } from "date-fns";
 
 const EventBooking = () => {
-  const venues = [
-    { id: 1, name: "Hall 1" },
-    { id: 2, name: "Hall 2" },
-    { id: 3, name: "Hall 3" },
-  ];
+  const [venues, setVenues] = useState([]);
+
+  useEffect(() => {
+    const fetchVenues = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/venues");
+        setVenues(response.data);
+      } catch (error) {
+        console.error("Error fetching venues:", error);
+      }
+    };
+
+    fetchVenues();
+  }, []);
 
   const [eventDetails, setEventDetails] = useState({
     eventName: "",
@@ -32,10 +41,14 @@ const EventBooking = () => {
   };
 
   const handleDateChange = (date) => {
-    setSelectedDate(date);
-
     // Format the date
     const formattedDate = format(date, "yyyy-MM-dd");
+    setSelectedDate(formattedDate);
+
+    // Fetch slots if a venue is selected
+    if (eventDetails.venueName) {
+      fetchDate(eventDetails.venueName, formattedDate);
+    }
 
     // Find the index of the current date in the existing dates
     const dateIndex = eventDetails.date.indexOf(formattedDate);
@@ -124,12 +137,42 @@ const EventBooking = () => {
     });
   };
 
+  const fetchDate = async (venueName, date) => {
+    if (!venueName || !date) return;
+
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/api/event/slots-by-date_venue`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+          params: {
+            venueName,
+            date,
+          },
+        },
+      );
+
+      console.log("Response data:", response.data);
+
+      // Convert the API response to an array of slot times
+      const slotTimes = response.data.map((slot) => slot.slotTime);
+
+      setCurrentDateSlots(slotTimes);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching date:", error);
+      throw error;
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Check if any selected dates have no time slots
     const emptySlotDates = eventDetails.date.filter(
-      (date, index) => eventDetails.slotTime[index]?.length === 0,
+      (_, index) => eventDetails.slotTime[index]?.length === 0,
     );
 
     if (emptySlotDates.length > 0) {
@@ -165,8 +208,6 @@ const EventBooking = () => {
         });
         setCurrentDateSlots([]);
         setSelectedDate(null);
-
-        console.log(eventDetails);
 
         alert("Event booked successfully!");
       } else {
@@ -247,8 +288,8 @@ const EventBooking = () => {
           >
             <option value="">Select a Venue</option>
             {venues.map((venue) => (
-              <option key={venue.id} value={venue.name}>
-                {venue.name}
+              <option key={venue.venueId} value={venue.venueName}>
+                {venue.venueName}
               </option>
             ))}
           </select>
@@ -268,6 +309,7 @@ const EventBooking = () => {
               selectedDate={selectedDate}
               selectedSlots={currentDateSlots}
               onSlotSelect={handleSlotSelection}
+              availableSlots={currentDateSlots} // Add this line
             />
           </div>
         </div>

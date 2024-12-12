@@ -13,18 +13,57 @@ const timeSlots = [
   "4:15pm - 5:00pm",
 ];
 
-const TimeSlotSelection = ({ selectedDate, selectedSlots, onSlotSelect }) => {
+const TimeSlotSelection = ({
+  selectedDate,
+  selectedSlots,
+  onSlotSelect,
+  availableSlots = [],
+}) => {
+  // Determine slot status based on available slots
+  const getSlotStatus = (slot) => {
+    // Extract the start time from the slot
+    const startTime = slot.split(" - ")[0];
+
+    // Find the matching slot in availableSlots
+    const matchingSlot = availableSlots.find(
+      (availSlot) =>
+        availSlot.replace(/\s*am|\s*pm/g, "") ===
+        startTime.replace(/\s*am|\s*pm/g, ""),
+    );
+
+    if (!matchingSlot) return "available"; // Default if no match found
+
+    return "pending"; // Adjust based on your API response
+  };
+
   // Check if the current slot is selected for the current date
   const isSlotSelected = (slot) => {
     if (!selectedDate) return false;
-
     const startTime = slot.split(" - ")[0];
-    const dateIndex = selectedDate
-      ? selectedSlots.findIndex((slots) => slots?.includes(startTime))
-      : -1;
-
-    return dateIndex !== -1;
+    return selectedSlots.includes(startTime);
   };
+
+  // Determine button classes based on slot status and selection
+  const getSlotButtonClasses = (slot) => {
+    const status = getSlotStatus(slot);
+    const isSelected = isSlotSelected(slot);
+
+    // Base classes for different statuses
+    const statusClasses = {
+      pending: "bg-yellow-200 text-yellow-800 cursor-not-allowed",
+      booked: "bg-red-200 text-red-800 cursor-not-allowed",
+      available: "bg-gray-200 text-gray-700 hover:bg-blue-100",
+    };
+
+    // If slot is selected, override with blue
+    if (isSelected) {
+      return "bg-blue-500 text-white";
+    }
+
+    // Return status-based classes
+    return statusClasses[status] || statusClasses["available"];
+  };
+
   return (
     <>
       <h3 className="text-xl font-semibold">
@@ -44,12 +83,14 @@ const TimeSlotSelection = ({ selectedDate, selectedSlots, onSlotSelect }) => {
             <button
               type="button"
               key={index}
-              onClick={() => onSlotSelect(slot)}
-              className={`w-full text-center p-3 rounded-lg transition-colors duration-200 ${
-                isSlotSelected(slot)
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-blue-100"
-              }`}
+              onClick={() => {
+                const status = getSlotStatus(slot);
+                if (status !== "booked") {
+                  onSlotSelect(slot);
+                }
+              }}
+              disabled={getSlotStatus(slot) === "booked"}
+              className={`w-full text-center p-3 rounded-lg transition-colors duration-200 ${getSlotButtonClasses(slot)}`}
             >
               {slot}
             </button>
