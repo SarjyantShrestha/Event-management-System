@@ -79,7 +79,7 @@ const UserTable = ({ onUserSelect }) => {
                   {user.role}
                 </span>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-center">
+              <td className="px-6 py-4 whitespace-nowrap">
                 <button
                   onClick={() => onUserSelect(user)}
                   className="px-2 py-1 rounded bg-gray-100 text-sm text-blue-500 hover:text-blue-700 mr-2"
