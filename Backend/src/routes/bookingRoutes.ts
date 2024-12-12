@@ -1,5 +1,6 @@
 import express from 'express';
 import { createBooking, getMyBookings, getAllBookings, getSlotsByDate, getSlotsByVenueNameAndDate, updateBookingStatus, deleteBooking, getApprovedBookings} from '../controllers/bookingController';
+import { createBooking, getMyBookings, getAllBookings, getSlotsByDate, getSlotsByVenueNameAndDate, updateBookingStatus} from '../controllers/bookingController';
 import { authenticateToken } from '../middleware/authToken';
 import verifyRole from "../middleware/verifyRole";
 
@@ -13,6 +14,9 @@ router.get("/allbookings", authenticateToken, verifyRole('admin'), getAllBooking
 router.get("/approvedbookings", authenticateToken, verifyRole('admin'), getApprovedBookings);
 router.get("/slots-by-date", getSlotsByDate);
 router.get("/slots-by-date_venue", getSlotsByVenueNameAndDate);
+
 router.put("/approvebooking",authenticateToken,verifyRole('admin'),updateBookingStatus);
 router.delete("/deletebooking",authenticateToken, deleteBooking);
+router.get("/approvebooking",authenticateToken,verifyRole('admin'),updateBookingStatus);
+
 export default router;
