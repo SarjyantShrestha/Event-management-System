@@ -123,14 +123,14 @@ const ManageEvents = () => {
       : bookings.filter((booking) => booking.slot.status === filter);
 
   return (
-    <div className="bg-white shadow-lg rounded-lg p-8">
+    <div className="bg-white rounded-lg p-8">
       <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">
         Manage Events
       </h1>
 
       {/* Filter Buttons */}
       <div className="flex justify-center space-x-4 mb-6">
-        {["All", "pending", "approved", "available"].map((status) => (
+        {["All", "pending", "booked", "available"].map((status) => (
           <button
             key={status}
             onClick={() => setFilter(status)}

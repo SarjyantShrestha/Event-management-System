@@ -43,7 +43,7 @@ const MainLayout = () => {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
+    <div className="flex h-screen overflow-hidden">
       {/* Sidebar */}
       <div
         className={`
@@ -157,7 +157,7 @@ const MainLayout = () => {
         {/* Dynamic Content */}
         <div
           className="
-            bg-gray-100 
+          bg-white
             p-6 
             overflow-y-auto 
             min-h-[calc(100vh-4rem)] 

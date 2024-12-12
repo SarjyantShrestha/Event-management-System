@@ -133,7 +133,7 @@ const ManageSpaces = () => {
   return (
     <>
       {modal !== null && <Amenities modal={modal} onClose={onClose} />}
-      <div className="bg-white shadow-lg rounded-lg p-8">
+      <div className="bg-white rounded-lg px-8">
         {/* Add Venue Button */}
         <div className="text-right mb-6">
           <button

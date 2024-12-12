@@ -5,29 +5,31 @@ const UserTable = ({ onUserSelect }) => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [userId, setUserId] = useState("");
+
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/api/users", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+      });
+      console.log(localStorage.getItem("authToken"));
+
+      if (response.status !== 200) {
+        throw new Error("Failed to fetch users.");
+      }
+
+      const data = response.data;
+      setUsers(data);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/api/users", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
-        });
-        console.log(localStorage.getItem("authToken"));
-
-        if (response.status !== 200) {
-          throw new Error("Failed to fetch users.");
-        }
-
-        const data = response.data;
-        setUsers(data);
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchUsers();
   }, []);
 
@@ -38,6 +40,22 @@ const UserTable = ({ onUserSelect }) => {
   if (error) {
     return <div>Error: {error}</div>;
   }
+
+  const deleteUser = async (userId) => {
+    console.log(userId);
+    try {
+      const response = await axios.delete(
+        `http://localhost:5000/api/users/${userId}`,
+      );
+
+      fetchUsers();
+      if (response.status !== 200) {
+        console.error("Couldn't delete user");
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -79,14 +97,17 @@ const UserTable = ({ onUserSelect }) => {
                   {user.role}
                 </span>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap">
+              <td className="px-6 py-4 whitespace-nowrap text-center">
                 <button
                   onClick={() => onUserSelect(user)}
                   className="px-2 py-1 rounded bg-gray-100 text-sm text-blue-500 hover:text-blue-700 mr-2"
                 >
                   view
                 </button>
-                <button className="px-2 py-1 rounded bg-gray-100 text-sm text-red-500 hover:text-red-700 mr-2">
+                <button
+                  onClick={() => deleteUser(user.userId)}
+                  className="px-2 py-1 rounded bg-gray-100 text-sm text-red-500 hover:text-red-700 mr-2"
+                >
                   delete
                 </button>
               </td>
