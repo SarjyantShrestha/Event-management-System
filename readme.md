@@ -91,7 +91,6 @@ The frontend server will run on [http://localhost:5173](http://localhost:5173) b
 ### Frontend
 - React.js
 - Tailwind CSS
-- React Big Calendar
 
 ### Backend
 - Node.js
