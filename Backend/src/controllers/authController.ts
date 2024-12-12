@@ -15,6 +15,14 @@ export const register = async (req: Request, res: Response) => {
     if (userExist) {
       return res.status(400).json({ message: "User already exists" });
     }
+    
+    // Validate password strength
+    const passwordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{6,})/;
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        message: "Password must be at least 6 characters long, include a number, and a special character",
+      });
+    }
 
     // Hash the password
     const hashedPassword = await argon2.hash(password);
