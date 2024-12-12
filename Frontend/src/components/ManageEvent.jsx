@@ -1,79 +1,128 @@
 import React, { useState, useEffect } from "react";
+import moment from "moment";
 
 const ManageEvents = () => {
-  const [events, setEvents] = useState([]);
+  const [bookings, setBookings] = useState([]);
   const [filter, setFilter] = useState("All");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [noBookings, setNoBookings] = useState(false);
 
-  // Fetch events from the backend
+  // Fetch bookings from the backend
   useEffect(() => {
-    const fetchEvents = async () => {
+    const fetchBookings = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/event-bookings"
+          "http://localhost:5000/api/event/allbookings",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+            },
+          }
         );
-        const data = await response.json();
-        setEvents(data);
+
+        if (!response.ok) {
+          // Check for specific 404 status for no bookings
+          if (response.status === 404) {
+            setNoBookings(true);
+            setBookings([]);
+          } else {
+            throw new Error("Failed to fetch bookings.");
+          }
+        } else {
+          const data = await response.json();
+          setBookings(data);
+          setNoBookings(false);
+        }
       } catch (error) {
-        console.error("Error fetching events:", error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
       }
     };
-
-    fetchEvents();
+    fetchBookings();
   }, []);
-//update status
-  const updateStatus = async (calendar_id, status) => {
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+
+  // Update status
+  const updateStatus = async (bookingId, status) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/event-bookings/${calendar_id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ status }) // Sending the status in the body
-      });
-  
+      const response = await fetch(
+        `http://localhost:5000/api/event/approvebooking`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+          body: JSON.stringify({
+            status: status,
+            bookingId: bookingId,
+          }),
+        }
+      );
+
       if (response.ok) {
-        const updatedEvent = await response.json();
-        // Update the local events state with the updated status
-        const updatedEvents = events.map((event) =>
-          event.calendar_id === calendar_id ? { ...event, status: updatedEvent.status } : event
+        const updatedBooking = await response.json();
+        console.log("Backend response:", updatedBooking);
+
+        // Update the status in the local state
+        setBookings((prev) =>
+          prev.map((booking) =>
+            booking.bookingId === bookingId
+              ? {
+                  ...booking,
+                  slot: {
+                    ...booking.slot,
+                    status: updatedBooking?.status || status,
+                  },
+                }
+              : booking
+          )
         );
-        setEvents(updatedEvents);
       } else {
-        console.error('Failed to update event status');
+        console.error(
+          "Failed to update booking status, status code:",
+          response.status
+        );
       }
     } catch (error) {
-      console.error('Error updating event status:', error);
+      console.error("Error updating booking status:", error);
     }
   };
 
-  //delete events
-
-  const deleteEvent = async (calendar_id) => {
+  // Delete booking
+  const deleteBooking = async (bookingId) => {
     try {
-      // Send DELETE request to the backend
-      const response = await fetch(`http://localhost:5000/api/event-bookings/${calendar_id}`, {
-        method: 'DELETE',
-      });
-  
+      const response = await fetch(
+        `http://localhost:5000/api/event/deletebooking?bookingId=${bookingId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        }
+      );
+
       if (response.ok) {
-        const data = await response.json();
-        console.log("Event deleted:", data);
-  
-        // Update UI by removing the deleted event
-        const updatedEvents = events.filter((event) => event.calendar_id !== calendar_id);
-        setEvents(updatedEvents);
+        setBookings((prev) =>
+          prev.filter((booking) => booking.bookingId !== bookingId)
+        );
+        console.log("Booking deleted successfully");
       } else {
-        console.error("Failed to delete event:", response.statusText);
+        console.error("Failed to delete booking");
       }
     } catch (error) {
-      console.error("Error deleting event:", error);
+      console.error("Error deleting booking:", error);
     }
   };
-  
-  const filteredEvents =
+
+  const filteredBookings =
     filter === "All"
-      ? events
-      : events.filter((event) => event.status === filter);
+      ? bookings
+      : bookings.filter((booking) => booking.slot.status === filter);
 
   return (
     <div className="p-8 bg-gray-100">
@@ -83,7 +132,7 @@ const ManageEvents = () => {
 
       {/* Filter Buttons */}
       <div className="flex justify-center space-x-4 mb-6">
-        {["All", "Pending", "Approved", "Denied"].map((status) => (
+        {["All", "pending", "approved", "denied"].map((status) => (
           <button
             key={status}
             onClick={() => setFilter(status)}
@@ -93,12 +142,12 @@ const ManageEvents = () => {
                 : "bg-gray-300 text-gray-700"
             } hover:bg-blue-500 hover:text-white transition`}
           >
-            {status}
+            {status.charAt(0).toUpperCase() + status.slice(1)}
           </button>
         ))}
       </div>
 
-      {/* Events Table */}
+      {/* Bookings Table */}
       <div className="overflow-auto rounded-lg shadow-lg">
         <table className="min-w-full bg-white border-collapse border border-gray-200">
           <thead className="bg-blue-600 text-white">
@@ -106,9 +155,8 @@ const ManageEvents = () => {
               {[
                 "Event Name",
                 "Venue",
-                "Start Date & Time",
-                "End Date & Time",
-                "Participants",
+                "Start Date & Slot",
+                "End Date & Slot",
                 "Status",
                 "Actions",
               ].map((header) => (
@@ -119,57 +167,68 @@ const ManageEvents = () => {
             </tr>
           </thead>
           <tbody className="text-gray-700">
-            {filteredEvents.map((event) => (
-              <tr key={event.calendar_id} className="hover:bg-gray-100 border-b">
-                <td className="py-4 px-6 text-center">{event.event_name}</td>
-                <td className="py-4 px-6 text-center">{event.venue_name}</td>
-                <td className="py-4 px-6 text-center">
-                  {(() => {
-                    // Format date and time
-                    const formattedStartDate = new Date(
-                      event.start_date
-                    ).toLocaleDateString(); // Formats to 'MM/DD/YYYY' by default
-                    const formattedStartTime = event.start_time.slice(0, 5); // Assuming end_time is 'HH:MM:SS'
-
-                    return `${formattedStartDate} at ${formattedStartTime}`;
-                  })()}
-                </td>
-                <td className="py-4 px-6 text-center">
-                  {(() => {
-                    // Format date and time
-                    const formattedEndDate = new Date(
-                      event.end_date
-                    ).toLocaleDateString(); // Formats to 'MM/DD/YYYY' by default
-                    const formattedEndTime = event.end_time.slice(0, 5); // Assuming end_time is 'HH:MM:SS'
-
-                    return `${formattedEndDate} at ${formattedEndTime}`;
-                  })()}
-                </td>
-
-                <td className="py-4 px-6 text-center">{event.participants}</td>
-                <td className="py-4 px-6 text-center">{event.status}</td>
-                <td className="py-4 px-6 flex justify-center space-x-3">
-                  <button
-                    onClick={() => updateStatus(event.calendar_id, "Approved")}
-                    className="text-green-500 hover:text-green-700"
-                  >
-                    Approve
-                  </button>
-                  <button
-                    onClick={() => updateStatus(event.calendar_id, "Denied")}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    Deny
-                  </button>
-                  <button
-                    onClick={() => deleteEvent(event.calendar_id)}
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    Delete
-                  </button>
+            {noBookings ? (
+              <tr>
+                <td
+                  colSpan="6"
+                  className="text-center py-8 text-gray-500 text-xl"
+                >
+                  No bookings found
                 </td>
               </tr>
-            ))}
+            ) : filteredBookings.length > 0 ? (
+              filteredBookings.map((booking) => {
+                const slotTime = booking.slot.slotTime;
+                const startTime = moment(slotTime, "hh:mm a");
+                const endTime = startTime.clone().add(45, "minutes");
+                const formattedEndTime = endTime.format("hh:mm a");
+
+                return (
+                  <tr key={booking.bookingId} className="hover:bg-gray-100 border-b">
+                    <td className="py-4 px-6 text-center">{booking.eventName}</td>
+                    <td className="py-4 px-6 text-center">
+                      {booking.slot.venue.venueName || "N/A"}
+                    </td>
+                    <td className="py-4 px-6 text-center">
+                      {booking.slot.date} - {booking.slot.slotTime}
+                    </td>
+                    <td className="py-4 px-6 text-center">
+                      {booking.slot.date} - {formattedEndTime}
+                    </td>
+                    <td className="py-4 px-6 text-center">{booking.slot.status}</td>
+                    <td className="py-4 px-6 flex justify-center space-x-3">
+                      <button
+                        onClick={() => updateStatus(booking.bookingId, "approved")}
+                        className="text-green-500 hover:text-green-700"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        onClick={() => updateStatus(booking.bookingId, "denied")}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        Deny
+                      </button>
+                      <button
+                        onClick={() => deleteBooking(booking.bookingId)}
+                        className="text-gray-500 hover:text-gray-700"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td
+                  colSpan="6"
+                  className="text-center py-8 text-gray-500 text-xl"
+                >
+                  No bookings match the current filter
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

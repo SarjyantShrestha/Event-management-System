@@ -1,55 +1,3 @@
-// import React from 'react';
-// import { Calendar, momentLocalizer } from 'react-big-calendar';
-// import moment from 'moment';
-// import 'react-big-calendar/lib/css/react-big-calendar.css';  // CSS for the calendar
-
-// // Set up the localizer
-// const localizer = momentLocalizer(moment);
-
-// const EventCalendar = () => {
-//   // Example event data
-//   const events = [
-//     {
-//       id: 1,
-//       title: "Holiday - New Year's Day",
-//       start: new Date(2024, 0, 1),  // January 1st, 2024
-//       end: new Date(2024, 0, 1),    // Same day
-//       color: "#FF5733",             // Red color for holiday
-//       allDay: true,
-//     },
-//     {
-//       id: 2,
-//       title: "Team Building Event",
-//       start: new Date(2024, 4, 15, 10, 0),  // May 15th, 2024, 10:00 AM
-//       end: new Date(2024, 4, 15, 12, 0),    // May 15th, 2024, 12:00 PM
-//       color: "#3498DB",                   // Blue color for event
-//       allDay: false,
-//     }
-//   ];
-
-//   return (
-//     <div style={{ height: '600px' }}>
-//       <Calendar
-//         localizer={localizer}
-//         events={events}  // Pass the events array
-//         startAccessor="start"
-//         endAccessor="end"
-//         defaultDate={new Date()} // Set default date to today's date
-//         eventPropGetter={(event) => ({
-//           style: {
-//             backgroundColor: event.color || "#3182CE",  // Use the custom event color or default to blue
-//             color: "#fff",  // Text color inside the event box
-//             borderRadius: "5px",  // Rounded corners
-//             padding: "5px",  // Padding inside the event box
-//           }
-//         })}
-//       />
-//     </div>
-//   );
-// };
-
-// export default EventCalendar;
-
 import React, { useEffect, useState } from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
@@ -64,7 +12,11 @@ const EventCalendar = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/event-bookings/approved');
+        const response = await fetch('http://localhost:5000/api/event/approvedbookings', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        });
         const data = await response.json();
         
         console.log('Fetched events:', data); // Log the fetched events to check the structure
@@ -72,24 +24,27 @@ const EventCalendar = () => {
         // Map the data to the format required by react-big-calendar
         const formattedEvents = data.map(event => {
           // Check if the event has the necessary properties
-          if (!event.start_date || !event.start_time || !event.end_date || !event.end_time) {
-            console.error('Event missing date/time:', event); // Log events missing required data
+          if (!event.slot || !event.slot.date || !event.slot.slotTime || !event.slot.venue || !event.slot.venue.venueName) {
+            console.error('Event missing necessary data:', event); // Log events missing required data
             return null; // Skip events that are missing necessary data
           }
 
-          // Use Moment.js to parse and format the combined date-time strings
-          const startDateTime = moment(`${event.start_date} ${event.start_time}`, 'YYYY-MM-DD HH:mm:ss').toDate();
-          const endDateTime = moment(`${event.end_date} ${event.end_time}`, 'YYYY-MM-DD HH:mm:ss').toDate();
+          // Combine event details into a single string for the event title
+          const eventTitle = `${event.eventName} - ${event.slot.venue.venueName}`;
+          
+          // Use Moment.js to parse and format the date-time
+          const startDateTime = moment(`${event.slot.date} ${event.slot.slotTime}`, 'YYYY-MM-DD hh:mm a');
+          const endDateTime = startDateTime.clone().add(45, 'minutes'); // Add 45 minutes to start time for end time
 
           return {
-            id: event.calendar_id,
-            title: event.event_name,
-            start: startDateTime,
-            end: endDateTime,
-            color: "#3182CE",  
-            allDay: false,     
+            id: event.bookingId,  // Use unique identifier
+            title: eventTitle,     // Display event name, date, time, and venue
+            start: startDateTime.toDate(),  // Start time
+            end: endDateTime.toDate(),      // End time (45 minutes after start time)
+            color: "#3182CE",      // Optional color
+            allDay: false,         // Set to false if not an all-day event
           };
-        }).filter(event => event !== null); 
+        }).filter(event => event !== null); // Remove any null entries
 
         setEvents(formattedEvents);
       } catch (error) {
@@ -98,7 +53,7 @@ const EventCalendar = () => {
     };
 
     fetchEvents();
-  }, []);
+  }, []); // Empty dependency array to run only once after component mount
 
   return (
     <div style={{ height: '600px' }}>
@@ -122,4 +77,3 @@ const EventCalendar = () => {
 };
 
 export default EventCalendar;
-

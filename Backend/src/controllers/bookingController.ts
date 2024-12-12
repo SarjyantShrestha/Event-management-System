@@ -150,7 +150,7 @@ export const deleteBooking = async (req: Request, res: Response) => {
     }
 
     // Convert bookingId to a number
-    const bookingId = parseInt(req.params.bookingId, 10);
+    const bookingId = parseInt(req.query.bookingId as string, 10);
 
     if (isNaN(bookingId)) {
       return res.status(400).json({ error: "Invalid booking ID" });
@@ -199,6 +199,33 @@ export const getAllBookings = async (req: Request, res: Response) => {
     res.status(500).json({ error: "An internal server error occurred" });
   }
 };
+
+
+// get by status
+
+export const getApprovedBookings = async (req: Request, res: Response) => {
+  try {
+    // Fetch only the approved bookings with relations to Slot, User, and Venue
+    const bookings = await bookingRepo.find({
+      where: {
+        slot: {
+          status: "booked",  // Filter for approved bookings
+        },
+      },
+      relations: ["slot", "slot.venue", "user"],
+    });
+
+    if (!bookings.length) {
+      return res.status(404).json({ message: "No approved bookings found" });
+    }
+
+    res.status(200).json(bookings);
+  } catch (error) {
+    console.error("Error fetching approved bookings:", error);
+    res.status(500).json({ error: "An internal server error occurred" });
+  }
+};
+
 
 
 export const getSlotsByDate = async (req: Request, res: Response) => {

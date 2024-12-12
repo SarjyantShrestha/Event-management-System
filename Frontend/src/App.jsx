@@ -19,13 +19,6 @@ import "./App.css";
 function App() {
   const { userrole } = useContext(UserContext);
 
-  const userData = {
-    name: "John Doe",
-    email: "johndoe@example.com",
-    role: "Organizer",
-    joinedAt: "2023-05-15T12:00:00Z",
-  };
-
   return (
     <BrowserRouter>
       <Routes>
@@ -54,7 +47,8 @@ function App() {
             {/* Shared Routes */}
             <Route path="events-calendar" element={<EventsCalendar />} />
             <Route path="event-booking" element={<EventBooking />} />
-            <Route path="profile" element={<Profile user={userData} />} />
+            <Route path="profile" element={<Profile />} />
+            
 
             {/* Admin-Only Routes */}
             <Route
