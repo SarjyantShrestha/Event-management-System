@@ -46,6 +46,7 @@ export const createBooking = async (req: Request, res: Response) => {
     }
 
     const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0)//Reset time portion to 00:00:00
     const bookings = [];
 
     // Process each date with its corresponding slot times
