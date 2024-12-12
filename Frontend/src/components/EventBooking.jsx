@@ -141,7 +141,6 @@ const EventBooking = () => {
     if (!venueName || !date) return;
 
     try {
-      console.log(date);
       const response = await axios.get(
         `http://localhost:5000/api/event/slots-by-date_venue`,
         {
@@ -155,11 +154,16 @@ const EventBooking = () => {
         },
       );
 
-      console.log("Response data:", response.data); // Debugging response
-      return response.data; // Return the fetched data if needed
+      console.log("Response data:", response.data);
+
+      // Convert the API response to an array of slot times
+      const slotTimes = response.data.map((slot) => slot.slotTime);
+
+      setCurrentDateSlots(slotTimes);
+      return response.data;
     } catch (error) {
       console.error("Error fetching date:", error);
-      throw error; // Handle error appropriately
+      throw error;
     }
   };
 
@@ -305,6 +309,7 @@ const EventBooking = () => {
               selectedDate={selectedDate}
               selectedSlots={currentDateSlots}
               onSlotSelect={handleSlotSelection}
+              availableSlots={currentDateSlots} // Add this line
             />
           </div>
         </div>
