@@ -45,10 +45,12 @@ function App() {
             />
 
             {/* Shared Routes */}
-            <Route path="events-calendar" element={<EventsCalendar />} />
+            <Route
+              path="events-calendar"
+              element={<EventsCalendar userrole={userrole} />}
+            />
             <Route path="event-booking" element={<EventBooking />} />
             <Route path="profile" element={<Profile />} />
-            
 
             {/* Admin-Only Routes */}
             <Route
