@@ -11,12 +11,18 @@ const EventBooking = () => {
   useEffect(() => {
     const fetchVenues = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/venues");
+        const response = await axios.get("http://localhost:5000/api/venues", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        });
         setVenues(response.data);
       } catch (error) {
         console.error("Error fetching venues:", error);
       }
     };
+
+    fetchVenues();
 
     fetchVenues();
   }, []);
@@ -194,7 +200,9 @@ const EventBooking = () => {
         "http://localhost:5000/api/event/booking",
         eventDetails,
         {
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
         },
       );
 
