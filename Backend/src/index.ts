@@ -34,6 +34,6 @@ app.use('/api/event', BookingRouter)
 AppDataSource.initialize()
     .then(() => {
         app.listen(port, () => { console.log(`Server is running on port ${port}`) })
-        app.listen(port, () => { console.log(`Server is running on http://52.72.129.0:${PORT}`);});
+        app.listen(port, () => { console.log(`Server is running on http://52.72.129.0:${port}`);});
     })
     .catch((err) => console.log(err))
