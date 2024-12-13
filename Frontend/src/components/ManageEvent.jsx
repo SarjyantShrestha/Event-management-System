@@ -156,33 +156,19 @@ const ManageEvents = () => {
 
       {/* Bookings Table */}
       <div className="overflow-x-auto rounded-lg border border-gray-200">
-        <table className="min-w-full bg-white divide-y divide-gray-200">
+        <table className="min-w-full bg-white divide-y divide-gray-200 text-center">
           <thead className="bg-gray-100">
             <tr>
-              {[
-                "Event Name",
-                "Venue",
-                "Start Date & Slot",
-                "End Date & Slot",
-                "Status",
-                "Actions",
-              ].map((header) => (
-                <th
-                  key={header}
-                  className="
-                    px-6 
-                    py-3 
-                    text-left 
-                    text-xs 
-                    font-medium 
-                    text-gray-500 
-                    uppercase 
-                    tracking-wider
-                  "
-                >
-                  {header}
-                </th>
-              ))}
+              {["Event Name", "Venue", "Date", "Slot", "Status", "Actions"].map(
+                (header) => (
+                  <th
+                    key={header}
+                    className=" px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    {header}
+                  </th>
+                ),
+              )}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
@@ -197,11 +183,6 @@ const ManageEvents = () => {
               </tr>
             ) : filteredBookings.length > 0 ? (
               filteredBookings.map((booking) => {
-                const slotTime = booking.slot.slotTime;
-                const startTime = moment(slotTime, "hh:mm a");
-                const endTime = startTime.clone().add(45, "minutes");
-                const formattedEndTime = endTime.format("hh:mm a");
-
                 return (
                   <tr
                     key={booking.bookingId}
@@ -214,10 +195,10 @@ const ManageEvents = () => {
                       {booking.slot.venue.venueName || "N/A"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {booking.slot.date} - {booking.slot.slotTime}
+                      {booking.slot.date}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {booking.slot.date} - {formattedEndTime}
+                      {booking.slot.slotTime}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
@@ -242,8 +223,8 @@ const ManageEvents = () => {
                         {booking.slot.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex space-x-3">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
+                      <div className="flex space-x-3 justify-center">
                         <button
                           onClick={() =>
                             updateStatus(booking.bookingId, "approved")

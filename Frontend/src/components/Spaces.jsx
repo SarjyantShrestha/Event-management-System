@@ -66,11 +66,12 @@ const ManageSpaces = () => {
         }
       }
     } catch (error) {
-      alert("An error occurred. Please try again.");
+      alert("Venue already exists.");
     }
   };
 
   const onClose = () => {
+    setVenueEditId(null);
     setModal(null);
     setName("");
     setLocation("");
@@ -211,7 +212,7 @@ const ManageSpaces = () => {
                           py-1 
                           rounded 
                           text-green-600 
-                          hover:bg-green-100 
+                          bg-green-100 
                           transition-colors 
                           duration-300
                         "
@@ -228,7 +229,7 @@ const ManageSpaces = () => {
                           py-1 
                           rounded 
                           text-red-600 
-                          hover:bg-red-100 
+                          bg-red-100 
                           transition-colors 
                           duration-300
                         "
