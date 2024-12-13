@@ -8,7 +8,7 @@ import { format } from "date-fns";
 const EventBooking = () => {
   const today = new Date();
   const [venues, setVenues] = useState([]);
-  const [venueId, setVenueId] = useState();
+  const [venueId, setVenueId] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null); // calender date used to display date above slots
   const [calendarSelectedDate, setCalendarSelectedDate] = useState([]); //selected calendar date in array
   const [selectedSlots, setSelectedSlots] = useState({}); // Store slots as an object with date as key

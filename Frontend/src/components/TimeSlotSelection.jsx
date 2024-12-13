@@ -138,18 +138,21 @@ const TimeSlotSelection = ({
                   type="button"
                   key={index}
                   onClick={() => handleSlotClick(time)}
-                  disabled={
-                    (calendarSelectedDate.length === 0 && venueId === null) ||
-                    slotStatus !== "available"
-                  }
+                  // disabled={
+                  //   calendarSelectedDate.length === 0 ||
+                  //   venueId === null ||
+                  //   slotStatus !== "available"
+                  // }
                   className={`w-full text-center p-3 rounded-lg transition-colors duration-200
                   ${
-                    selectedSlots[selectedDate]?.includes(time)
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-100 hover:bg-blue-200"
+                    slotStatus !== "available" ||
+                    calendarSelectedDate.length === 0 ||
+                    venueId === null
+                      ? "bg-red-100 text-red-600 cursor-not-allowed opacity-50"
+                      : selectedSlots[selectedDate]?.includes(time)
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-100 hover:bg-blue-200"
                   }
-                  ${slotStatus !== "available" ? "bg-red-100 text-red-600 cursor-not-allowed opacity-50" : ""}
-                  ${calendarSelectedDate.length === 0 ? "cursor-not-allowed opacity-50" : ""}
       `}
                 >
                   {time}
