@@ -15,7 +15,6 @@ const EventBooking = () => {
   const [eventDetails, setEventDetails] = useState({
     eventName: "",
     date: [],
-    slotTime: [],
     venueName: "",
     participants: 0,
   });
@@ -25,7 +24,7 @@ const EventBooking = () => {
     setSelectedDate(formattedDate);
   };
 
-  //form input
+  //form input handle
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setEventDetails({
@@ -36,6 +35,53 @@ const EventBooking = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Check if each selected date has at least one slot
+    for (const date of calendarSelectedDate) {
+      if (!selectedSlots[date] || selectedSlots[date].length === 0) {
+        alert(`Please select at least one slot for the date: ${date}`);
+        return;
+      }
+    }
+    console.log(selectedSlots);
+
+    const requestData = {
+      eventName: eventDetails.eventName,
+      venueName: eventDetails.venueName,
+      participants: eventDetails.participants,
+      slotsByDate: selectedSlots, // The key-value pair where dates map to slot arrays
+    };
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/event/booking",
+        requestData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        },
+      );
+
+      if (response.status === 200 || response.status === 201) {
+        alert("Event booked successfully!");
+        // Reset form state after successful submission
+        setEventDetails({
+          eventName: "",
+          date: [],
+          venueName: "",
+          participants: 0,
+        });
+        setCalendarSelectedDate([]);
+        setSelectedSlots({});
+      } else {
+        alert(response.data.error || "Booking failed.");
+      }
+    } catch (error) {
+      console.error("Error booking event:", error);
+      alert(
+        error.response?.data?.error || "An error occurred. Please try again.",
+      );
+    }
   };
 
   const fetchVenues = async () => {
