@@ -19,17 +19,20 @@ const TimeSlotSelection = ({
   selectedSlots,
   setSelectedSlots,
 }) => {
-  // Function to handle selecting/deselecting a time slot
+  // Handle selecting/deselecting a time slot
   const handleSlotClick = (slot) => {
-    if (selectedSlots.includes(slot)) {
-      // Deselect the slot if already selected
-      setSelectedSlots(
-        selectedSlots.filter((selectedSlot) => selectedSlot !== slot),
+    const updatedSlots = { ...selectedSlots };
+    const currentDateSlots = updatedSlots[selectedDate] || [];
+
+    if (currentDateSlots.includes(slot)) {
+      updatedSlots[selectedDate] = currentDateSlots.filter(
+        (selectedSlot) => selectedSlot !== slot,
       );
     } else {
-      // Select the slot if not already selected
-      setSelectedSlots([...selectedSlots, slot]);
+      updatedSlots[selectedDate] = [...currentDateSlots, slot];
     }
+
+    setSelectedSlots(updatedSlots);
   };
 
   return (
@@ -55,7 +58,7 @@ const TimeSlotSelection = ({
               disabled={calendarSelectedDate.length === 0}
               className={`w-full text-center p-3 rounded-lg transition-colors duration-200
                 ${
-                  selectedSlots.includes(time)
+                  selectedSlots[selectedDate]?.includes(time)
                     ? "bg-blue-500 text-white"
                     : "bg-gray-100 hover:bg-blue-200"
                 }

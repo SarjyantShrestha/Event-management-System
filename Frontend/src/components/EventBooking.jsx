@@ -10,7 +10,7 @@ const EventBooking = () => {
   const [venues, setVenues] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null); // calender date used to display date above slots
   const [calendarSelectedDate, setCalendarSelectedDate] = useState([]); //selected calendar date in array
-  const [selectedSlots, setSelectedSlots] = useState([]);
+  const [selectedSlots, setSelectedSlots] = useState({}); // Store slots as an object with date as key
 
   const [eventDetails, setEventDetails] = useState({
     eventName: "",
