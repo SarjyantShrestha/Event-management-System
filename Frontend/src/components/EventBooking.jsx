@@ -6,6 +6,7 @@ import axios from "axios";
 import { format } from "date-fns";
 
 const EventBooking = () => {
+  const today = new Date();
   const [venues, setVenues] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null); // calender date used to display date above slots
   const [calendarSelectedDate, setCalendarSelectedDate] = useState([]); //selected calendar date in array
@@ -177,6 +178,7 @@ const EventBooking = () => {
             <Calendar
               onChange={handleDateChange} //set current date
               minDetail="month"
+              minDate={today}
               calendarType="gregory"
               onClickDay={handleDateClick} //add dates to array for tile highlight
               tileClassName={tileClassName} //for tile highlight
