@@ -7,24 +7,36 @@ import navLinks from "../constants/index";
 const MainLayout = () => {
   const [userRole, setUserRole] = useState(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [activeLink, setActiveLink] = useState(null);
   const { username, logout } = useContext(UserContext);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchUserRole = () => {
-      const token = localStorage.getItem("authToken");
-      if (token) {
-        try {
-          const decodedToken = jwtDecode(token);
-          setUserRole(decodedToken.role);
-        } catch (error) {
-          console.error("Invalid token:", error);
-          navigate("/login");
-        }
-      } else {
+    const path = localStorage.getItem("activeLink");
+    if (!path) {
+      setActiveLink("/");
+      navigate(path);
+    } else {
+      setActiveLink(path);
+      navigate(path);
+    }
+  }, []);
+
+  const fetchUserRole = () => {
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      try {
+        const decodedToken = jwtDecode(token);
+        setUserRole(decodedToken.role);
+      } catch (error) {
+        console.error("Invalid token:", error);
         navigate("/login");
       }
-    };
+    } else {
+      navigate("/login");
+    }
+  };
+  useEffect(() => {
     fetchUserRole();
   }, [navigate]);
 
@@ -32,10 +44,9 @@ const MainLayout = () => {
     ? navLinks.filter((nav) => nav.roles.includes(userRole))
     : [];
 
-  const [activeLink, setActiveLink] = useState(null);
-
   const handleLinkClick = (path) => {
     setActiveLink(path);
+    localStorage.setItem("activeLink", path);
   };
 
   const toggleSidebar = () => {

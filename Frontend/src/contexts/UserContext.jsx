@@ -27,6 +27,7 @@ export const UserProvider = ({ children }) => {
     setUsername(null);
     setUserrole(null);
     localStorage.removeItem("authToken");
+    localStorage.removeItem("activeLink");
   };
 
   return (
