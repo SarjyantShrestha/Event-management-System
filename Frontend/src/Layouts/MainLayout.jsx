@@ -133,7 +133,8 @@ const MainLayout = () => {
             h-16 
             text-gray-800 
             flex 
-            justify-between 
+            justify-end 
+            space-x-10
             items-center 
             px-8 
             shadow-md 
@@ -142,9 +143,9 @@ const MainLayout = () => {
             flex-shrink-0
           "
         >
-          <div className="flex items-center space-x-4">
+          <div className="flex space-x-2 items-end">
             <i className="fas fa-user text-gray-600 text-xl"></i>
-            <div>
+            <div className=" flex justify-center items-center space-x-2">
               <span className="text-sm text-gray-600">Welcome, </span>
               <span className="font-bold text-gray-800">{username}</span>
             </div>
