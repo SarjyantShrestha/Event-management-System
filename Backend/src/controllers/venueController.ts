@@ -127,3 +127,13 @@ export const editVenue = async (req: Request, res: Response) => {
 
   }
 }
+
+export const totalVenues = async (req: Request, res: Response) => {
+  try {
+    const total = await venueRepo.count();
+    res.status(200).json({ totalVenues: total });
+  } catch (error) {
+    console.error("Error fetching total venues:", error);
+    res.status(500).json({ error: "An internal server error occurred" });
+  }
+};

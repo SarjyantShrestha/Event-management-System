@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { format } from "date-fns";
 
 const timeSlots = [
@@ -14,70 +14,32 @@ const timeSlots = [
 ];
 
 const TimeSlotSelection = ({
+  calendarSelectedDate,
   selectedDate,
   selectedSlots,
-  onSlotSelect,
-  availableSlots = [],
+  setSelectedSlots,
 }) => {
-  console.log("DAMN:" + selectedSlots);
+  // Handle selecting/deselecting a time slot
+  const handleSlotClick = (slot) => {
+    const updatedSlots = { ...selectedSlots };
+    const currentDateSlots = updatedSlots[selectedDate] || [];
 
-  // Determine slot status based on available slots
-  const getSlotStatus = (time) => {
-    // Extract the start time from the slot
+    if (currentDateSlots.includes(slot)) {
+      updatedSlots[selectedDate] = currentDateSlots.filter(
+        (selectedSlot) => selectedSlot !== slot,
+      );
+    } else {
+      updatedSlots[selectedDate] = [...currentDateSlots, slot];
+    }
 
-    const startTime = time.split(" - ")[0].split(" ")[0];
-    // Find the matching slot in availableSlots
-    const matchingSlot = availableSlots.find(
-      (availSlot) => availSlot === startTime,
-    );
-
-    if (!matchingSlot) {
-      return "available";
-    } // Default if no match found
-
-    return "pending"; // Adjust based on your API response
-  };
-
-  // Check if the current slot is selected for the current date
-  // const isSlotSelected = (time) => {
-  //   if (!selectedDate) return false;
-  //   const startTime = time.split(" - ")[0];
-  //   return selectedSlots.includes(startTime);
-  // };
-
-  // Determine button classes based on slot status and selection
-  // const getSlotButtonClasses = (slot) => {
-  //   const status = getSlotStatus(slot);
-  //   const isSelected = isSlotSelected(slot);
-
-  //   // Base classes for different statuses
-  //   const statusClasses = {
-  //     pending: "bg-yellow-200 text-yellow-800 cursor-not-allowed",
-  //     booked: "bg-red-200 text-red-800 cursor-not-allowed",
-  //     available: "bg-gray-200 text-gray-700 hover:bg-blue-100",
-  //   };
-
-  //   // If slot is selected, override with blue
-  //   if (isSelected) {
-  //     return "bg-blue-500 text-white";
-  //   }
-
-  //   // Return status-based classes
-  //   return statusClasses[status] || statusClasses["available"];
-  // };
-
-  const getButtonColor = (time) => {
-    const status = getSlotStatus(time);
-
-    if (status === "available") return " bg-white-600";
-    else return " bg-blue-600";
+    setSelectedSlots(updatedSlots);
   };
 
   return (
     <>
       <h3 className="text-xl font-semibold">
         <div className="text-center">
-          <p className="text-lg mb-4 text-blue-50000">
+          <p className="text-lg mb-4 text-blue-500">
             {selectedDate ? (
               format(selectedDate, "eeee, MMMM d")
             ) : (
@@ -92,17 +54,16 @@ const TimeSlotSelection = ({
             <button
               type="button"
               key={index}
-              onClick={() => {
-                const status = getSlotStatus(time);
-                if (status !== "pending") {
-                  onSlotSelect(time);
+              onClick={() => handleSlotClick(time)}
+              disabled={calendarSelectedDate.length === 0}
+              className={`w-full text-center p-3 rounded-lg transition-colors duration-200
+                ${
+                  selectedSlots[selectedDate]?.includes(time)
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-100 hover:bg-blue-200"
                 }
-              }}
-              disabled={
-                getSlotStatus(time) === "booked" ||
-                getSlotStatus(time) === "pending"
-              }
-              className={`w-full text-center p-3 rounded-lg transition-colors duration-200 ${getButtonColor(time)}`}
+                ${calendarSelectedDate.length === 0 ? "cursor-not-allowed opacity-50" : ""}
+              `}
             >
               {time}
             </button>

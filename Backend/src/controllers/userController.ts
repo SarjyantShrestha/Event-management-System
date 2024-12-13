@@ -73,3 +73,13 @@ export const deleteUser = async (req: Request, res: Response) => {
 
   }
 }
+
+export const totalUsers = async (req: Request, res: Response) => {
+  try {
+    const total = await userRepo.count();
+    res.status(200).json({ totalUsers: total });
+  } catch (error) {
+    console.error("Error fetching total users:", error);
+    res.status(500).json({ error: "An internal server error occurred" });
+  }
+};

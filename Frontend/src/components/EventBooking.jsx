@@ -1,44 +1,30 @@
 import React, { useState, useEffect } from "react";
 import TimeSlotSelection from "./TimeSlotSelection";
 import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css";
+import "./customCss/calendar.css";
 import axios from "axios";
 import { format } from "date-fns";
 
 const EventBooking = () => {
+  const today = new Date();
   const [venues, setVenues] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(null); // calender date used to display date above slots
+  const [calendarSelectedDate, setCalendarSelectedDate] = useState([]); //selected calendar date in array
+  const [selectedSlots, setSelectedSlots] = useState({}); // Store slots as an object with date as key
 
-  useEffect(() => {
-    const fetchVenues = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/api/venues", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
-        });
-        setVenues(response.data);
-      } catch (error) {
-        console.error("Error fetching venues:", error);
-      }
-    };
-
-    fetchVenues();
-  }, []);
-
-  // submit
   const [eventDetails, setEventDetails] = useState({
     eventName: "",
     date: [],
-    slotTime: [], // Store selected slots here
     venueName: "",
     participants: 0,
   });
 
-  // calender date
-  const [selectedDate, setSelectedDate] = useState(null);
+  const handleDateChange = (date) => {
+    const formattedDate = format(date, "yyyy-MM-dd");
+    setSelectedDate(formattedDate);
+  };
 
-  const [currentDateSlots, setCurrentDateSlots] = useState([]);
-
+  //form input handle
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setEventDetails({
@@ -47,109 +33,71 @@ const EventBooking = () => {
     });
   };
 
-  useState(() => {
-    console.log(currentDateSlots);
-  }, [currentDateSlots]);
-
-  const handleDateChange = (date) => {
-    // Format the date
-    const formattedDate = format(date, "yyyy-MM-dd");
-    setSelectedDate(formattedDate);
-
-    // Fetch slots if a venue is selected
-    if (eventDetails.venueName) {
-      fetchDate(eventDetails.venueName, formattedDate);
-    }
-
-    // Find the index of the current date in the existing dates
-    const dateIndex = eventDetails.date.indexOf(formattedDate);
-
-    // Reset current date slots
-    if (dateIndex !== -1) {
-      // If the date exists, get its slots
-      setCurrentDateSlots(eventDetails.slotTime[dateIndex] || []);
-    } else {
-      // If it's a new date, reset slots
-      setCurrentDateSlots([]);
-    }
-
-    setEventDetails((prevDetails) => {
-      // Check if the date is already selected
-      const existingDateIndex = prevDetails.date.indexOf(formattedDate);
-
-      if (existingDateIndex === -1) {
-        // Date not in the array, add it
-        return {
-          ...prevDetails,
-          date: [...prevDetails.date, formattedDate],
-          slotTime: [...prevDetails.slotTime, []], // Add empty slot array for this date
-        };
-      } else {
-        // Date already in the array, remove it
-        const updatedDates = prevDetails.date.filter(
-          (d) => d !== formattedDate,
-        );
-        const updatedSlotTimes = prevDetails.slotTime.filter(
-          (_, index) => index !== existingDateIndex,
-        );
-
-        return {
-          ...prevDetails,
-          date: updatedDates,
-          slotTime: updatedSlotTimes,
-        };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    // Check if each selected date has at least one slot
+    for (const date of calendarSelectedDate) {
+      if (!selectedSlots[date] || selectedSlots[date].length === 0) {
+        alert(`Please select at least one slot for the date: ${date}`);
+        return;
       }
-    });
+    }
+    console.log(selectedSlots);
+
+    const requestData = {
+      eventName: eventDetails.eventName,
+      venueName: eventDetails.venueName,
+      participants: eventDetails.participants,
+      slotsByDate: selectedSlots, // The key-value pair where dates map to slot arrays
+    };
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/event/booking",
+        requestData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        },
+      );
+
+      if (response.status === 200 || response.status === 201) {
+        alert("Event booked successfully!");
+        // Reset form state after successful submission
+        setEventDetails({
+          eventName: "",
+          date: [],
+          venueName: "",
+          participants: 0,
+        });
+        setCalendarSelectedDate([]);
+        setSelectedSlots({});
+      } else {
+        alert(response.data.error || "Booking failed.");
+      }
+    } catch (error) {
+      console.error("Error booking event:", error);
+      alert(
+        error.response?.data?.error || "An error occurred. Please try again.",
+      );
+    }
   };
 
-  const handleSlotSelection = (slot) => {
-    const startTime = slot.split(" - ")[0].split(" ")[0];
-
-    setEventDetails((prevDetails) => {
-      // If no date selected, do nothing
-      if (!selectedDate) return prevDetails;
-
-      const formattedDate = format(selectedDate, "yyyy-MM-dd");
-
-      // Find the index of the current date
-      const dateIndex = prevDetails.date.indexOf(formattedDate);
-
-      // Create a copy of the current slotTime array
-      const updatedSlotTime = [...prevDetails.slotTime];
-
-      // If the date doesn't have any slots yet, add an empty array
-      if (dateIndex === -1) return prevDetails;
-
-      // Check if the slot is already selected for this date
-      const currentDateSlots = updatedSlotTime[dateIndex] || [];
-      const isSelected = currentDateSlots.includes(startTime);
-
-      // Update current date slots state
-      let newCurrentDateSlots;
-
-      // Update slots for the specific date
-      if (isSelected) {
-        // Remove the slot
-        newCurrentDateSlots = currentDateSlots.filter((s) => s !== startTime);
-        updatedSlotTime[dateIndex] = newCurrentDateSlots;
-        console.log("#############");
-      } else {
-        // Add the slot
-        newCurrentDateSlots = [...currentDateSlots, startTime];
-        updatedSlotTime[dateIndex] = newCurrentDateSlots;
-      }
-
-      // Update current date slots state
-      setCurrentDateSlots(newCurrentDateSlots);
-
-      return {
-        ...prevDetails,
-        slotTime: updatedSlotTime,
-      };
-    });
+  const fetchVenues = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/api/venues", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+      });
+      setVenues(response.data);
+    } catch (error) {
+      console.error("Error fetching venues:", error);
+    }
   };
 
-  const fetchDate = async (venueName, date) => {
+  const fetchSlots = async (venueName, date) => {
     if (!venueName || !date) return;
 
     try {
@@ -169,9 +117,9 @@ const EventBooking = () => {
       console.log("Response data:", response.data);
 
       // Convert the API response to an array of slot times
-      const slotTimes = response.data.map((slot) => slot.slotTime);
+      // const slotTimes = response.data.map((slot) => slot.slotTime);
+      // setCurrentDateSlots(slotTimes);
 
-      setCurrentDateSlots(slotTimes);
       return response.data;
     } catch (error) {
       console.error("Error fetching date:", error);
@@ -179,71 +127,32 @@ const EventBooking = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  useEffect(() => {
+    fetchVenues();
+  }, []);
 
-    // Check if any selected dates have no time slots
-    const emptySlotDates = eventDetails.date.filter(
-      (_, index) => eventDetails.slotTime[index]?.length === 0,
-    );
+  //CALENDAR COMPONENT FUNCTIONS
+  //calendar date select and deselect
+  const handleDateClick = (date) => {
+    const formattedDate = format(date, "yyyy-MM-dd");
 
-    if (emptySlotDates.length > 0) {
-      // Create a readable list of dates without slots
-      const datesList = emptySlotDates.join(", ");
-      alert(`Please select time slots for the following date(s): ${datesList}`);
-      return;
-    }
-
-    // Validate that dates and slots match
-    const isValid = eventDetails.date.length === eventDetails.slotTime.length;
-    if (!isValid) {
-      alert("Please ensure each selected date has corresponding time slots.");
-      return;
-    }
-
-    try {
-      const response = await axios.post(
-        "http://localhost:5000/api/event/booking",
-        eventDetails,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
-        },
+    if (calendarSelectedDate.includes(formattedDate)) {
+      // Remove the date if it's already selected
+      setCalendarSelectedDate(
+        calendarSelectedDate.filter((d) => d !== formattedDate),
       );
-
-      if (response.status === 200 || response.status === 201) {
-        setEventDetails({
-          eventName: "",
-          date: [],
-          slotTime: [],
-          venueName: "",
-          participants: 0,
-        });
-        setCurrentDateSlots([]);
-        setSelectedDate(null);
-
-        alert("Event booked successfully!");
-      } else {
-        alert(response.data.error || "Booking failed.");
-      }
-    } catch (error) {
-      console.error("Error booking event:", error);
-      alert(
-        error.response?.data?.error || "An error occurred. Please try again.",
-      );
+    } else {
+      // Add the date if it's not selected
+      setCalendarSelectedDate([...calendarSelectedDate, formattedDate]);
     }
   };
 
+  //Change tile color for selected date
   const tileClassName = ({ date, view }) => {
-    // Only add class to dates in month view
     if (view === "month") {
-      // Convert date to ISO string format for comparison
       const formattedDate = format(date, "yyyy-MM-dd");
-
-      // Check if this date is in the selected dates
-      if (eventDetails.date.includes(formattedDate)) {
-        return "bg-blue-500 text-white font-bold italic"; // Tailwind classes for highlighting
+      if (calendarSelectedDate.includes(formattedDate)) {
+        return "bg-blue-500 text-white font-bold";
       }
     }
     return null;
@@ -311,19 +220,22 @@ const EventBooking = () => {
 
         {/* Calendar and Time Slot Selection */}
         <div className="flex h-80 space-x-8">
-          <div className="w-1/2 flex mb-auto justify-center">
+          <div className="w-1/2 flex mb-auto justify-center my-auto">
             <Calendar
-              onChange={handleDateChange}
-              value={selectedDate}
-              tileClassName={tileClassName}
+              onChange={handleDateChange} //set current date
+              minDetail="month"
+              minDate={today}
+              calendarType="gregory"
+              onClickDay={handleDateClick} //add dates to array for tile highlight
+              tileClassName={tileClassName} //for tile highlight
             />
           </div>
           <div className="w-1/2">
             <TimeSlotSelection
               selectedDate={selectedDate}
-              selectedSlots={currentDateSlots}
-              onSlotSelect={handleSlotSelection}
-              availableSlots={currentDateSlots} // Add this line
+              calendarSelectedDate={calendarSelectedDate}
+              selectedSlots={selectedSlots}
+              setSelectedSlots={setSelectedSlots}
             />
           </div>
         </div>

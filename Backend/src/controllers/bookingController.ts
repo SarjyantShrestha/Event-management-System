@@ -334,3 +334,28 @@ export const updateBookingStatus = async (req: Request, res: Response) => {
     res.status(500).json({ error: "An internal server error occurred" });
   }
 };
+
+export const totalBookings = async (req: Request, res: Response) => {
+  try {
+    const total = await bookingRepo.count();
+    res.status(200).json({ totalBookings: total });
+  } catch (error) {
+    console.error("Error fetching total bookings:", error);
+    res.status(500).json({ error: "An internal server error occurred" });
+  }
+};
+
+export const totalEvents = async (req: Request, res: Response) => {
+  try {
+    // Query unique event names
+    const uniqueEventNames = await bookingRepo
+      .createQueryBuilder("booking")
+      .select("COUNT(DISTINCT booking.eventName)", "count")
+      .getRawOne();
+
+    res.status(200).json({ uniqueEventNames: parseInt(uniqueEventNames.count, 10) });
+  } catch (error) {
+    console.error("Error counting unique event names:", error);
+    res.status(500).json({ error: "An internal server error occurred" });
+  }
+};

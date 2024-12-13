@@ -1,7 +1,84 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router";
+import axios from "axios";
 
 const DashboardAdmin = () => {
+  const [TotalEvents, setTotalEvents] = useState("");
+  const [TotalBookings, setTotalBookings] = useState("");
+  const [TotalVenues, setTotalVenues] = useState("");
+  const [totalUsers, setTotalUsers] = useState("");
+
+  const fetchTotalBookings = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:5000/api/event/totalbookings",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        },
+      );
+      setTotalBookings(response.data.totalBookings);
+    } catch (error) {
+      console.error("Error getting total bookings", error);
+    }
+  };
+
+  const fetchTotalEvents = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:5000/api/event/totalevents",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        },
+      );
+      setTotalEvents(response.data.uniqueEventNames);
+    } catch (error) {
+      console.error("Error getting total bookings", error);
+    }
+  };
+
+  const fetchTotalVenues = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:5000/api/venues/totalvenues",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        },
+      );
+      setTotalVenues(response.data.totalVenues);
+    } catch (error) {
+      console.error("Error getting total venues", error);
+    }
+  };
+
+  const fetchTotalUsers = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:5000/api/users/totalusers",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        },
+      );
+      setTotalUsers(response.data.totalUsers);
+    } catch (error) {
+      console.error("Error getting total bookings", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTotalBookings();
+    fetchTotalEvents();
+    fetchTotalVenues();
+    fetchTotalUsers();
+  }, []);
+
   return (
     <div className="content">
       <div className="widgets-container">
@@ -9,12 +86,10 @@ const DashboardAdmin = () => {
           <div className="widget-icon blue">
             <i className="fas fa-calendar-check"></i>
           </div>
-          <div className="widget-info">
-            <h3>Total Events</h3>
-            <p className="number">125</p>
-            <div className="widget-details">
-              <span>Upcoming: 45</span>
-              <span>Completed: 80</span>
+          <div className="widget-info flex  items-center space-x-10">
+            <div>
+              <h3>Total Events</h3>
+              <p className="number">{TotalEvents}</p>
             </div>
           </div>
         </div>
@@ -25,12 +100,7 @@ const DashboardAdmin = () => {
           </div>
           <div className="widget-info">
             <h3>Total Bookings</h3>
-            <p className="number">89</p>
-            <div className="widget-details">
-              <span>Pending: 12</span>
-              <span>Confirmed: 72</span>
-              <span>Cancelled: 5</span>
-            </div>
+            <p className="number">{TotalBookings}</p>
           </div>
         </div>
 
@@ -39,12 +109,8 @@ const DashboardAdmin = () => {
             <i className="fas fa-door-open"></i>
           </div>
           <div className="widget-info">
-            <h3>Available Spaces</h3>
-            <p className="number">8</p>
-            <div className="widget-details">
-              <span>Total Rooms: 12</span>
-              <span>Occupied: 4</span>
-            </div>
+            <h3>Total Venues</h3>
+            <p className="number">{TotalVenues}</p>
           </div>
         </div>
 
@@ -53,12 +119,8 @@ const DashboardAdmin = () => {
             <i className="fas fa-users"></i>
           </div>
           <div className="widget-info">
-            <h3>User Activity</h3>
-            <p className="number">256</p>
-            <div className="widget-details">
-              <span>New Users: 15</span>
-              <span>Active: 180</span>
-            </div>
+            <h3>Total Users</h3>
+            <p className="number">{totalUsers}</p>
           </div>
         </div>
       </div>
