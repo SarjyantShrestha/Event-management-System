@@ -8,6 +8,7 @@ import { format } from "date-fns";
 const EventBooking = () => {
   const today = new Date();
   const [venues, setVenues] = useState([]);
+  const [venueId, setVenueId] = useState();
   const [selectedDate, setSelectedDate] = useState(null); // calender date used to display date above slots
   const [calendarSelectedDate, setCalendarSelectedDate] = useState([]); //selected calendar date in array
   const [selectedSlots, setSelectedSlots] = useState({}); // Store slots as an object with date as key
@@ -35,6 +36,7 @@ const EventBooking = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log(selectedSlots);
     // Check if each selected date has at least one slot
     for (const date of calendarSelectedDate) {
       if (!selectedSlots[date] || selectedSlots[date].length === 0) {
@@ -94,36 +96,6 @@ const EventBooking = () => {
       setVenues(response.data);
     } catch (error) {
       console.error("Error fetching venues:", error);
-    }
-  };
-
-  const fetchSlots = async (venueName, date) => {
-    if (!venueName || !date) return;
-
-    try {
-      const response = await axios.get(
-        `http://localhost:5000/api/event/slots-by-date_venue`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
-          params: {
-            venueName,
-            date,
-          },
-        },
-      );
-
-      console.log("Response data:", response.data);
-
-      // Convert the API response to an array of slot times
-      // const slotTimes = response.data.map((slot) => slot.slotTime);
-      // setCurrentDateSlots(slotTimes);
-
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching date:", error);
-      throw error;
     }
   };
 
@@ -211,7 +183,13 @@ const EventBooking = () => {
           >
             <option value="">Select a Venue</option>
             {venues.map((venue) => (
-              <option key={venue.venueId} value={venue.venueName}>
+              <option
+                key={venue.venueId}
+                value={venue.venueName}
+                onClick={() => {
+                  setVenueId(venue.venueId);
+                }}
+              >
                 {venue.venueName}
               </option>
             ))}
@@ -236,6 +214,7 @@ const EventBooking = () => {
               calendarSelectedDate={calendarSelectedDate}
               selectedSlots={selectedSlots}
               setSelectedSlots={setSelectedSlots}
+              venueId={venueId}
             />
           </div>
         </div>

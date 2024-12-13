@@ -18,7 +18,7 @@ router.get("/allbookings", authenticateToken, verifyRole('admin'), getAllBooking
 //Event management
 router.get("/approvedbookings", authenticateToken, verifyRole('admin'), getApprovedBookings);
 router.get("/slots-by-date", getSlotsByDate);
-router.get("/slots-by-date_venue", getSlotStatusesForVenueAndDate);
+router.get("/slots-status", getSlotStatusesForVenueAndDate);
 
 router.put("/approvebooking", authenticateToken, verifyRole('admin'), updateBookingStatus);
 router.delete("/deletebooking", authenticateToken, deleteBooking);

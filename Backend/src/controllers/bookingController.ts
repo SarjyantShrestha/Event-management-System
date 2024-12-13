@@ -263,9 +263,9 @@ export const getSlotsByDate = async (req: Request, res: Response) => {
 
 export const getSlotStatusesForVenueAndDate = async (req: Request, res: Response) => {
   try {
-    const { venueId, date } = req.body;
+    const { venueId, date } = req.query;
 
-    if (!venueId || typeof venueId !== "number") {
+    if (!venueId || isNaN(Number(venueId))) {
       return res.status(400).json({ error: "Invalid or missing venueId" });
     }
 
@@ -275,7 +275,7 @@ export const getSlotStatusesForVenueAndDate = async (req: Request, res: Response
 
     // Fetch slots for the given venue ID and date
     const slots = await slotRepo.find({
-      where: { venue: { venueId }, date },
+      where: { venue: { venueId: Number(venueId) }, date },
       relations: ["venue"],
     });
 
