@@ -16,6 +16,6 @@ export class Slot {
   @Column({ type: "varchar", length: 10, enum: ["available", "booked", "pending"] })
   status: "available" | "booked" | "pending";
 
-  @Column({ type: "varchar", length: 15 })
+  @Column({ type: "varchar", length: 50 })
   slotTime: string;
 }
