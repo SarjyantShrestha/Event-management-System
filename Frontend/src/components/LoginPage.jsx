@@ -2,6 +2,11 @@ import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router";
 import { jwtDecode } from "jwt-decode";
 import { UserContext } from "../contexts/UserContext";
+import {
+  AtSymbolIcon,
+  LockClosedIcon,
+  ExclamationCircleIcon,
+} from "@heroicons/react/24/solid";
 
 const LoginPage = () => {
   const [errors, setErrors] = useState({});
@@ -10,6 +15,7 @@ const LoginPage = () => {
   const { setUsername, setUserrole, userrole } = useContext(UserContext);
 
   const navigate = useNavigate();
+
   useEffect(() => {
     if (userrole !== null) {
       navigate("/");
@@ -25,14 +31,11 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    //clears previous errors
     setErrors({});
     let isValid = true;
 
-    // Regex for email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    // Validate email
     if (!email) {
       handleErrors("email", "Email is required.");
       isValid = false;
@@ -41,7 +44,6 @@ const LoginPage = () => {
       isValid = false;
     }
 
-    // Validate password
     if (!password) {
       handleErrors("password", "Password is required.");
       isValid = false;
@@ -62,7 +64,6 @@ const LoginPage = () => {
         const decodedToken = jwtDecode(data.token);
         setUserrole(decodedToken.role);
         setUsername(decodedToken.username);
-
         navigate("/");
       } else {
         alert(data.message || "Invalid credentials.");
@@ -74,78 +75,106 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen items-center bg-gray-200">
-      <h1 className="text-3xl my-12">Welcome to Event Space</h1>
-      <div className="bg-white p-8 rounded-lg shadow-lg w-96">
-        <h2 className="text-2xl font-semibold text-center mb-6">
-          Login to your account
-        </h2>
-        <form onSubmit={handleSubmit} action="/login" method="POST">
-          <div className="mb-4">
-            <label htmlFor="email" className="block text-gray-700">
-              Email
-            </label>
-            <div className="flex items-center border border-gray-300 rounded-lg p-2 mt-1">
-              <span className="mr-1">
-                <i className="fas fa-user"></i>
-              </span>
-              <input
-                type="text"
-                id="email"
-                value={email}
-                onChange={(e) => {
-                  setErrors({});
-                  setEmail(e.target.value);
-                }}
-                className="w-full p-1 border-none outline-none"
-                placeholder="Email"
-              />
-            </div>
-            {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-            )}
+    <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 flex items-center justify-center p-4">
+      <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
+        <div className="px-8 py-10 bg-white">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-600 mb-2">
+              Event Space
+            </h1>
+            <p className="text-gray-500 text-sm">
+              Login to access your account
+            </p>
           </div>
 
-          <div className="mb-6">
-            <label htmlFor="password" className="block text-gray-700">
-              Password
-            </label>
-            <div className="flex items-center border border-gray-300 rounded-lg p-2 mt-1">
-              <span className="mr-1">
-                <i className="fas fa-lock"></i>
-              </span>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => {
-                  setErrors({});
-                  setPassword(e.target.value);
-                }}
-                className="w-full p-1 border-none outline-none"
-                placeholder="Password"
-              />
-            </div>
-            {errors.password && (
-              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-            )}
-            <div className="flex justify-between mt-2">
-              <a href="/" className="text-blue-600 text-xs">
-                Forgot password?
-              </a>
-              <a href="/register" className="text-blue-600 text-xs">
-                Register account
-              </a>
-            </div>
-          </div>
+          <form onSubmit={handleSubmit}>
+            <div className="space-y-4">
+              {/* Email Input */}
+              <div>
+                <div
+                  className={`flex items-center border rounded-lg p-3 transition-all duration-300 
+                  ${errors.email ? "border-red-400" : "border-gray-300 hover:border-indigo-500"}`}
+                >
+                  <AtSymbolIcon
+                    className={`h-5 w-5 mr-2 
+                    ${errors.email ? "text-red-500" : "text-gray-400"}`}
+                  />
+                  <input
+                    type="text"
+                    value={email}
+                    onChange={(e) => {
+                      setErrors({});
+                      setEmail(e.target.value);
+                    }}
+                    placeholder="Email address"
+                    className="w-full bg-transparent outline-none text-gray-700"
+                  />
+                </div>
+                {errors.email && (
+                  <div className="flex items-center text-red-500 text-xs mt-2">
+                    <ExclamationCircleIcon className="h-4 w-4 mr-1" />
+                    {errors.email}
+                  </div>
+                )}
+              </div>
 
-          <button
-            type="submit"
-            className="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 focus:outline-none"
-          >
-            Log in
-          </button>
-        </form>
+              {/* Password Input */}
+              <div>
+                <div
+                  className={`flex items-center border rounded-lg p-3 transition-all duration-300 
+                  ${errors.password ? "border-red-400" : "border-gray-300 hover:border-indigo-500"}`}
+                >
+                  <LockClosedIcon
+                    className={`h-5 w-5 mr-2 
+                    ${errors.password ? "text-red-500" : "text-gray-400"}`}
+                  />
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => {
+                      setErrors({});
+                      setPassword(e.target.value);
+                    }}
+                    placeholder="Password"
+                    className="w-full bg-transparent outline-none text-gray-700"
+                  />
+                </div>
+                {errors.password && (
+                  <div className="flex items-center text-red-500 text-xs mt-2">
+                    <ExclamationCircleIcon className="h-4 w-4 mr-1" />
+                    {errors.password}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Links */}
+            <div className="flex justify-between mt-4 text-sm">
+              <a
+                href="/forgot-password"
+                className="text-indigo-600 hover:text-indigo-800 transition-colors"
+              >
+                Forgot Password?
+              </a>
+              <a
+                href="/register"
+                className="text-indigo-600 hover:text-indigo-800 transition-colors"
+              >
+                Create Account
+              </a>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              className="w-full mt-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 
+              text-white font-bold rounded-lg hover:opacity-90 transition-all 
+              focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            >
+              Log In
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

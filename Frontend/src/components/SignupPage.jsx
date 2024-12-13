@@ -1,4 +1,10 @@
 import React, { useState } from "react";
+import {
+  UserIcon,
+  EnvelopeIcon,
+  LockClosedIcon,
+  ExclamationCircleIcon,
+} from "@heroicons/react/24/solid";
 
 const SignupPage = () => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -22,7 +28,6 @@ const SignupPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    //clears previous errors
     setErrors({});
 
     let isValid = true;
@@ -69,7 +74,6 @@ const SignupPage = () => {
 
     if (!isValid) return;
 
-    //call if valid
     try {
       const response = await fetch("http://localhost:5000/api/auth/register", {
         method: "POST",
@@ -97,137 +101,173 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen items-center bg-gray-200">
-      <h1 className="text-3xl my-12">Welcome to Event Space</h1>
-      <div className="bg-white p-8 rounded-lg shadow-lg w-[30rem]">
-        <h2 className="text-2xl font-semibold text-center mb-6">
-          Create a new account
-        </h2>
-        <form onSubmit={handleSubmit} action="/register" method="POST">
-          <div className="mb-4">
-            <label className="block text-gray-700 mb-2">Name</label>
-            <div className="flex space-x-4">
-              {/* First Name Field */}
-              <div className="flex-1">
-                <div className="flex items-center border border-gray-300 rounded-lg p-2">
-                  <span className="mr-2">
-                    <i className="fas fa-user"></i>
-                  </span>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 flex items-center justify-center p-4">
+      <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
+        <div className="px-8 py-10 bg-white">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-600 mb-2">
+              Event Space
+            </h1>
+            <p className="text-gray-500 text-sm">Create a new account</p>
+          </div>
+
+          <form onSubmit={handleSubmit}>
+            <div className="space-y-4">
+              {/* Name Inputs */}
+              <div className="flex space-x-4">
+                {/* First Name */}
+                <div className="flex-1">
+                  <div
+                    className={`flex items-center border rounded-lg p-3 transition-all duration-300 
+                    ${errors.firstname ? "border-red-400" : "border-gray-300 hover:border-indigo-500"}`}
+                  >
+                    <UserIcon
+                      className={`h-5 w-5 mr-2 
+                      ${errors.firstname ? "text-red-500" : "text-purple-400"}`}
+                    />
+                    <input
+                      type="text"
+                      value={firstname}
+                      onChange={(e) => setFirstname(e.target.value)}
+                      placeholder="First Name"
+                      className="w-full bg-transparent outline-none text-gray-700"
+                    />
+                  </div>
+                  {errors.firstname && (
+                    <div className="flex items-center text-red-500 text-xs mt-2">
+                      <ExclamationCircleIcon className="h-4 w-4 mr-1" />
+                      {errors.firstname}
+                    </div>
+                  )}
+                </div>
+
+                {/* Last Name */}
+                <div className="flex-1">
+                  <div
+                    className={`flex items-center border rounded-lg p-3 transition-all duration-300 
+                    ${errors.lastname ? "border-red-400" : "border-gray-300 hover:border-indigo-500"}`}
+                  >
+                    <UserIcon
+                      className={`h-5 w-5 mr-2 
+                      ${errors.lastname ? "text-red-500" : "text-purple-400"}`}
+                    />
+                    <input
+                      type="text"
+                      value={lastname}
+                      onChange={(e) => setLastname(e.target.value)}
+                      placeholder="Last Name"
+                      className="w-full bg-transparent outline-none text-gray-700"
+                    />
+                  </div>
+                  {errors.lastname && (
+                    <div className="flex items-center text-red-500 text-xs mt-2">
+                      <ExclamationCircleIcon className="h-4 w-4 mr-1" />
+                      {errors.lastname}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Email Input */}
+              <div>
+                <div
+                  className={`flex items-center border rounded-lg p-3 transition-all duration-300 
+                  ${errors.email ? "border-red-400" : "border-gray-300 hover:border-indigo-500"}`}
+                >
+                  <EnvelopeIcon
+                    className={`h-5 w-5 mr-2 
+                    ${errors.email ? "text-red-500" : "text-purple-400"}`}
+                  />
                   <input
                     type="text"
-                    id="firstname"
-                    value={firstname}
-                    onChange={(e) => setFirstname(e.target.value)}
-                    className="w-full p-1 border-none outline-none"
-                    placeholder="First Name"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Email address"
+                    className="w-full bg-transparent outline-none text-gray-700"
                   />
                 </div>
-                {errors.firstname && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.firstname}
-                  </p>
+                {errors.email && (
+                  <div className="flex items-center text-red-500 text-xs mt-2">
+                    <ExclamationCircleIcon className="h-4 w-4 mr-1" />
+                    {errors.email}
+                  </div>
                 )}
               </div>
 
-              {/* Last Name Field */}
-              <div className="flex-1">
-                <div className="flex items-center border border-gray-300 rounded-lg p-2">
-                  <span className="mr-2">
-                    <i className="fas fa-user"></i>
-                  </span>
+              {/* Password Input */}
+              <div>
+                <div
+                  className={`flex items-center border rounded-lg p-3 transition-all duration-300 
+                  ${errors.password ? "border-red-400" : "border-gray-300 hover:border-indigo-500"}`}
+                >
+                  <LockClosedIcon
+                    className={`h-5 w-5 mr-2 
+                    ${errors.password ? "text-red-500" : "text-purple-400"}`}
+                  />
                   <input
-                    type="text"
-                    id="lastname"
-                    value={lastname}
-                    onChange={(e) => setLastname(e.target.value)}
-                    className="w-full p-1 border-none outline-none"
-                    placeholder="Last Name"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Password"
+                    className="w-full bg-transparent outline-none text-gray-700"
                   />
                 </div>
-                {errors.lastname && (
-                  <p className="text-red-500 text-sm mt-1">{errors.lastname}</p>
+                {errors.password && (
+                  <div className="flex items-center text-red-500 text-xs mt-2">
+                    <ExclamationCircleIcon className="h-4 w-4 mr-1" />
+                    {errors.password}
+                  </div>
+                )}
+              </div>
+
+              {/* Confirm Password Input */}
+              <div>
+                <div
+                  className={`flex items-center border rounded-lg p-3 transition-all duration-300 
+                  ${errors.confirmPassword ? "border-red-400" : "border-gray-300 hover:border-indigo-500"}`}
+                >
+                  <LockClosedIcon
+                    className={`h-5 w-5 mr-2 
+                    ${errors.confirmPassword ? "text-red-500" : "text-purple-400"}`}
+                  />
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirm Password"
+                    className="w-full bg-transparent outline-none text-gray-700"
+                  />
+                </div>
+                {errors.confirmPassword && (
+                  <div className="flex items-center text-red-500 text-xs mt-2">
+                    <ExclamationCircleIcon className="h-4 w-4 mr-1" />
+                    {errors.confirmPassword}
+                  </div>
                 )}
               </div>
             </div>
-          </div>
-          <div className="mb-4">
-            <label htmlFor="email" className="block text-gray-700">
-              Email
-            </label>
-            <div className="flex items-center border border-gray-300 rounded-lg p-2 mt-1">
-              <span className="mr-2">
-                <i className="fas fa-envelope"></i>
-              </span>
-              <input
-                type="text"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full p-1 border-none outline-none"
-                placeholder="Email"
-              />
-            </div>
-            {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-            )}
-          </div>
 
-          <div className="mb-4">
-            <label htmlFor="password" className="block text-gray-700">
-              Password
-            </label>
-            <div className="flex items-center border border-gray-300 rounded-lg p-2 mt-1">
-              <span className="mr-2">
-                <i className="fas fa-lock"></i>
-              </span>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full p-1 border-none outline-none"
-                placeholder="Password"
-              />
+            {/* Login Link */}
+            <div className="text-center mt-4">
+              <a
+                href="/login"
+                className="text-purple-600 hover:text-purple-800 text-sm transition-colors"
+              >
+                Already have an account?
+              </a>
             </div>
-            {errors.password && (
-              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-            )}
-          </div>
 
-          <div className="mb-6">
-            <label htmlFor="confirm-password" className="block text-gray-700">
-              Confirm Password
-            </label>
-            <div className="flex items-center border border-gray-300 rounded-lg p-2 mt-1">
-              <span className="mr-2">
-                <i className="fas fa-lock"></i>
-              </span>
-              <input
-                type="password"
-                id="confirm-password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full p-1 border-none outline-none"
-                placeholder="Password"
-              />
-            </div>
-            {errors.confirmPassword && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.confirmPassword}
-              </p>
-            )}
-            <a href="/login" className="text-blue-600 text-xs">
-              Already have an account?
-            </a>
-          </div>
-
-          <button
-            type="submit"
-            className="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 focus:outline-none"
-          >
-            Register
-          </button>
-        </form>
+            {/* Submit Button */}
+            <button
+              type="submit"
+              className="w-full mt-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 
+              text-white font-bold rounded-lg hover:opacity-90 transition-all 
+              focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            >
+              Register
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
