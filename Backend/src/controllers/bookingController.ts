@@ -261,42 +261,6 @@ export const getSlotsByDate = async (req: Request, res: Response) => {
   }
 };
 
-
-// export const getSlotsByVenueNameAndDate = async (req: Request, res: Response) => {
-//   try {
-//     const { date, venueName } = req.query;
-    
-//     // Validate inputs
-//     if (!date || typeof date !== "string") {
-//       return res.status(400).json({ error: "A valid date string is required" });
-//     }
-//     if (!venueName || typeof venueName !== "string") {
-//       return res.status(400).json({ error: "A valid venue name is required" });
-//     }
-
-//     // Fetch slots for the given venue name and date
-//     const slots = await slotRepo.find({
-//       relations: ["venue"], // Include the venue relation to access venueName
-//       where: {
-//         date,
-//         venue: {
-//           venueName, // Filter by venueName
-//         },
-//       },
-//     });
-//     console.log(slots)
-
-//     if (!slots.length) {
-//       return res.status(200).json({ message: "No slots found for this venue and date" });
-//     }
-
-//     res.status(200).json(slots);
-//   } catch (error) {
-//     console.error("Error fetching slots by venue name and date:", error);
-//     res.status(500).json({ error: "An internal server error occurred" });
-//   }
-// };
-
 export const getSlotStatusesForVenueAndDate = async (req: Request, res: Response) => {
   try {
     const { venueId, date } = req.body;
