@@ -36,53 +36,58 @@ const EventBooking = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(selectedSlots);
-    // Check if each selected date has at least one slot
-    for (const date of calendarSelectedDate) {
-      if (!selectedSlots[date] || selectedSlots[date].length === 0) {
-        alert(`Please select at least one slot for the date: ${date}`);
-        return;
+    if (calendarSelectedDate.length === 0) {
+      setSelectedSlots([]);
+      alert("select a date");
+    } else {
+      console.log(selectedSlots);
+      // Check if each selected date has at least one slot
+      for (const date of calendarSelectedDate) {
+        if (!selectedSlots[date] || selectedSlots[date].length === 0) {
+          alert(`Please select at least one slot for the date: ${date}`);
+          return;
+        }
       }
-    }
-    console.log(selectedSlots);
+      console.log(selectedSlots);
 
-    const requestData = {
-      eventName: eventDetails.eventName,
-      venueName: eventDetails.venueName,
-      participants: eventDetails.participants,
-      slotsByDate: selectedSlots, // The key-value pair where dates map to slot arrays
-    };
+      const requestData = {
+        eventName: eventDetails.eventName,
+        venueName: eventDetails.venueName,
+        participants: eventDetails.participants,
+        slotsByDate: selectedSlots, // The key-value pair where dates map to slot arrays
+      };
 
-    try {
-      const response = await axios.post(
-        "http://localhost:5000/api/event/booking",
-        requestData,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      try {
+        const response = await axios.post(
+          "http://localhost:5000/api/event/booking",
+          requestData,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+            },
           },
-        },
-      );
+        );
 
-      if (response.status === 200 || response.status === 201) {
-        alert("Event booked successfully!");
-        // Reset form state after successful submission
-        setEventDetails({
-          eventName: "",
-          date: [],
-          venueName: "",
-          participants: 0,
-        });
-        setCalendarSelectedDate([]);
-        setSelectedSlots({});
-      } else {
-        alert(response.data.error || "Booking failed.");
+        if (response.status === 200 || response.status === 201) {
+          alert("Event booked successfully!");
+          // Reset form state after successful submission
+          setEventDetails({
+            eventName: "",
+            date: [],
+            venueName: "",
+            participants: 0,
+          });
+          setCalendarSelectedDate([]);
+          setSelectedSlots({});
+        } else {
+          alert(response.data.error || "Booking failed.");
+        }
+      } catch (error) {
+        console.error("Error booking event:", error);
+        alert(
+          error.response?.data?.error || "An error occurred. Please try again.",
+        );
       }
-    } catch (error) {
-      console.error("Error booking event:", error);
-      alert(
-        error.response?.data?.error || "An error occurred. Please try again.",
-      );
     }
   };
 

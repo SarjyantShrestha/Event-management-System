@@ -13,12 +13,12 @@ const MainLayout = () => {
 
   useEffect(() => {
     const path = localStorage.getItem("activeLink");
-    if (!path) {
-      setActiveLink("/");
-      navigate(path);
-    } else {
+    if (path) {
       setActiveLink(path);
       navigate(path);
+    } else {
+      setActiveLink("/");
+      navigate("/");
     }
   }, []);
 
@@ -116,10 +116,14 @@ const MainLayout = () => {
       {/* Main Content Area */}
       <div
         className={`
+          flex 
+          flex-col 
           flex-1 
           transition-all 
           duration-300 
           ${isSidebarCollapsed ? "ml-20" : "ml-64"}
+          h-screen 
+          overflow-hidden
         `}
       >
         {/* Top Navbar */}
@@ -135,6 +139,7 @@ const MainLayout = () => {
             shadow-md 
             border-b 
             border-gray-200
+            flex-shrink-0
           "
         >
           <div className="flex items-center space-x-4">
@@ -168,10 +173,10 @@ const MainLayout = () => {
         {/* Dynamic Content */}
         <div
           className="
+            flex-1 
+            overflow-y-auto 
           bg-white
             p-6 
-            overflow-y-auto 
-            min-h-[calc(100vh-4rem)] 
             scrollbar-thin 
             scrollbar-track-gray-200 
             scrollbar-thumb-blue-500
