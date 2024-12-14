@@ -263,19 +263,25 @@ export const getSlotsByDate = async (req: Request, res: Response) => {
 
 export const getSlotStatusesForVenueAndDate = async (req: Request, res: Response) => {
   try {
-    const { venueId, date } = req.query;
+    const { venueName, date } = req.query;
 
-    if (!venueId || isNaN(Number(venueId))) {
-      return res.status(400).json({ error: "Invalid or missing venueId" });
+    if (!venueName || typeof venueName !== "string") {
+      return res.status(400).json({ error: "Invalid or missing venueName" });
     }
 
     if (!date || typeof date !== "string") {
       return res.status(400).json({ error: "Invalid or missing date" });
     }
 
-    // Fetch slots for the given venue ID and date
+    const venue = await venueRepo.findOne({ where: { venueName } });
+
+    if (!venue) {
+      return res.status(404).json({ error: "Venue not found" });
+    }
+
+    // Fetch slots for the given venue and date
     const slots = await slotRepo.find({
-      where: { venue: { venueId: Number(venueId) }, date },
+      where: { venue: { venueId: venue.venueId }, date },
       relations: ["venue"],
     });
 

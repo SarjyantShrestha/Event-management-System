@@ -36,7 +36,7 @@ const TimeSlotSelection = ({
                 Authorization: `Bearer ${localStorage.getItem("authToken")}`,
               },
               params: {
-                venueId: venueId,
+                venueName: venueId,
                 date: selectedDate,
               },
             },

@@ -32,6 +32,10 @@ const EventBooking = () => {
       ...eventDetails,
       [name]: value,
     });
+
+    if (name === "venueName") {
+      setVenueId(value);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -191,9 +195,9 @@ const EventBooking = () => {
               <option
                 key={venue.venueId}
                 value={venue.venueName}
-                onClick={() => {
-                  setVenueId(venue.venueId);
-                }}
+                // onClick={() => {
+                //   setVenueId(venue.venueId);
+                // }}
               >
                 {venue.venueName}
               </option>
